@@ -82,5 +82,6 @@ Route::get('/mod/{mod:slug}/{page:slug}', [PageController::class, 'publicShow'])
 Route::get('invitations/{token}', [ModController::class, 'showInvitation'])->name('invitations.show');
 Route::post('invitations/{token}/accept', [ModController::class, 'acceptInvitation'])->name('invitations.accept')->middleware('auth');
 Route::post('invitations/{token}/reject', [ModController::class, 'rejectInvitation'])->name('invitations.reject')->middleware('auth');
+Route::delete('invitations/{token}/cancel', [ModController::class, 'cancelInvitation'])->name('invitations.cancel')->middleware('auth');
 
 require __DIR__.'/settings.php';

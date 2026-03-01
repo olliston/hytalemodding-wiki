@@ -198,8 +198,15 @@ class ModController extends Controller
 
         $mod->load(['owner', 'collaborators']);
 
+        $pendingInvitations = ModInvitation::with(['user', 'inviter'])
+            ->where('mod_id', $mod->id)
+            ->whereNull('accepted_at')
+            ->where('expires_at', '>', now())
+            ->get();
+
         return Inertia::render('Mods/ManageCollaborators', [
             'mod' => $mod,
+            'pendingInvitations' => $pendingInvitations,
             'canManage' => true,
         ]);
     }
@@ -447,6 +454,35 @@ class ModController extends Controller
 
         return redirect()->route('invitations.show', $token)
             ->with('error', 'Failed to accept invitation. Please try again.');
+    }
+
+    /**
+     * Cancel an invitation (for mod owners/admins).
+     */
+    public function cancelInvitation(string $token)
+    {
+        $user = Auth::user();
+
+        $invitation = ModInvitation::with(['mod', 'user'])
+            ->where('token', $token)
+            ->firstOrFail();
+
+        if (! $invitation->mod->userCan($user, 'manage_collaborators')) {
+            abort(403);
+        }
+
+        if ($invitation->isExpired()) {
+            return back()->withErrors(['invitation' => 'This invitation has already expired.']);
+        }
+
+        if ($invitation->isAccepted()) {
+            return back()->withErrors(['invitation' => 'This invitation has already been accepted.']);
+        }
+
+        $invitedUserName = $invitation->user->name;
+        $invitation->delete();
+
+        return back()->with('success', "Invitation to {$invitedUserName} has been cancelled.");
     }
 
     /**

@@ -39,6 +39,28 @@ interface Collaborator extends User {
   };
 }
 
+interface PendingInvitation {
+  id: string;
+  token: string;
+  role: 'viewer' | 'editor' | 'admin';
+  expires_at: string;
+  user: User;
+  inviter: User;
+}
+
+interface CollaboratorOrInvite {
+  id: number;
+  name: string;
+  username: string;
+  avatar_url?: string;
+  role: 'admin' | 'editor' | 'viewer';
+  invited_by: number;
+  created_at?: string;
+  expires_at?: string;
+  token?: string;
+  isPending: boolean;
+}
+
 interface Mod {
   id: string;
   name: string;
@@ -51,10 +73,11 @@ interface Mod {
 
 interface Props {
   mod: Mod;
+  pendingInvitations: PendingInvitation[];
   canManage: boolean;
 }
 
-export default function ManageCollaborators({ mod, canManage }: Props) {
+export default function ManageCollaborators({ mod, pendingInvitations, canManage }: Props) {
   useFlashMessages();
   const [showAddDialog, setShowAddDialog] = useState(false);
 
@@ -64,6 +87,30 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
   });
 
   const { delete: deleteRequest } = useForm();
+
+  const allPeople: CollaboratorOrInvite[] = [
+    ...mod.collaborators.map(collab => ({
+      id: collab.id,
+      name: collab.name,
+      username: collab.username,
+      avatar_url: collab.avatar_url,
+      role: collab.pivot.role,
+      invited_by: collab.pivot.invited_by,
+      created_at: collab.pivot.created_at,
+      isPending: false,
+    })),
+    ...pendingInvitations.map(invitation => ({
+      id: invitation.user.id,
+      name: invitation.user.name,
+      username: invitation.user.username,
+      avatar_url: invitation.user.avatar_url,
+      role: invitation.role,
+      invited_by: invitation.inviter.id,
+      expires_at: invitation.expires_at,
+      token: invitation.token,
+      isPending: true,
+    })),
+  ];
 
   const addCollaborator = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,30 +144,28 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
     });
   };
 
-  const removeCollaborator = (collaboratorId: number) => {
-    if (confirm('Are you sure you want to remove this collaborator?')) {
-      const collaboratorToRemove = mod.collaborators.find(
-        (c) => c.id === collaboratorId,
-      );
-      const collaboratorName = collaboratorToRemove?.name || 'collaborator';
+  const removeCollaborator = (person: CollaboratorOrInvite) => {
+    const actionText = person.isPending ? 'cancel this invitation' : 'remove this collaborator';
+    if (confirm(`Are you sure you want to ${actionText}?`)) {
+      const endpoint = person.isPending
+        ? `/dashboard/invitations/${person.token}/cancel`
+        : `/dashboard/mods/${mod.slug}/collaborators/${person.id}`;
 
-      deleteRequest(
-        `/dashboard/mods/${mod.slug}/collaborators/${collaboratorId}`,
-        {
-          onSuccess: () => {
-            sileo.success({
-              title: 'Collaborator Removed',
-              description: `${collaboratorName} has been removed from the mod`,
-            });
-          },
-          onError: () => {
-            sileo.error({
-              title: 'Error',
-              description: 'Failed to remove collaborator. Please try again.',
-            });
-          },
+      deleteRequest(endpoint, {
+        onSuccess: () => {
+          const successText = person.isPending ? 'Invitation cancelled' : 'Collaborator removed';
+          sileo.success({
+            title: successText,
+            description: `${person.name} has been ${person.isPending ? 'uninvited' : 'removed'} from the mod`,
+          });
         },
-      );
+        onError: () => {
+          sileo.error({
+            title: 'Error',
+            description: `Failed to ${person.isPending ? 'cancel invitation' : 'remove collaborator'}. Please try again.`,
+          });
+        },
+      });
     }
   };
 
@@ -351,12 +396,12 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
               <CardTitle className="flex items-center justify-between">
                 <span className="flex items-center">
                   <UsersIcon className="mr-2 h-5 w-5" />
-                  Collaborators ({mod.collaborators.length})
+                  Collaborators & Invitations ({allPeople.length})
                 </span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {mod.collaborators.length === 0 ? (
+              {allPeople.length === 0 ? (
                 <div className="py-8 text-center">
                   <UsersIcon className="mx-auto mb-4 h-12 w-12 text-gray-400" />
                   <h3 className="mb-2 text-lg font-medium text-gray-900">
@@ -372,49 +417,61 @@ export default function ManageCollaborators({ mod, canManage }: Props) {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {mod.collaborators.map((collaborator) => (
+                  {allPeople.map((person) => (
                     <div
-                      key={collaborator.id}
+                      key={`${person.isPending ? 'pending' : 'active'}-${person.id}`}
                       className="flex items-center justify-between rounded-lg border p-4 hover:bg-gray-50"
                     >
                       <div className="flex items-center">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
                           <span className="text-sm font-medium text-gray-800">
-                            {collaborator.name.charAt(0)}
+                            {person.name.charAt(0)}
                           </span>
                         </div>
                         <div className="ml-4">
-                          <p className="text-sm font-medium text-gray-900">
-                            {collaborator.name}
+                          <p className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                            {person.name}
+                            {person.isPending && (
+                              <Badge variant="outline" className="text-xs">
+                                Pending
+                              </Badge>
+                            )}
                           </p>
                           <p className="text-sm text-gray-600">
-                            @{collaborator.username} • Joined{' '}
-                            {formatDate(collaborator.pivot.created_at)}
+                            @{person.username} • {person.isPending
+                              ? `Expires ${formatDate(person.expires_at!)}`
+                              : `Joined ${formatDate(person.created_at!)}`}
                           </p>
                         </div>
                       </div>
 
                       <div className="flex items-center space-x-3">
-                        <Select
-                          value={collaborator.pivot.role}
-                          onValueChange={(value) =>
-                            updateRole(collaborator.id, value)
-                          }
-                        >
-                          <SelectTrigger className="w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="editor">Editor</SelectItem>
-                            <SelectItem value="viewer">Viewer</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        {person.isPending ? (
+                          <Badge className={getRoleColor(person.role)}>
+                            {person.role.charAt(0).toUpperCase() + person.role.slice(1)}
+                          </Badge>
+                        ) : (
+                          <Select
+                            value={person.role}
+                            onValueChange={(value) =>
+                              updateRole(person.id, value)
+                            }
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="editor">Editor</SelectItem>
+                              <SelectItem value="viewer">Viewer</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
 
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => removeCollaborator(collaborator.id)}
+                          onClick={() => removeCollaborator(person)}
                           className="text-red-600 hover:bg-red-50 hover:text-red-700"
                         >
                           <TrashIcon className="h-4 w-4" />
