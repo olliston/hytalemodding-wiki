@@ -160,10 +160,6 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
               <span>By {mod.owner.name}</span>
               <span className="mx-2">•</span>
               <span>{mod.collaborators.length} collaborators</span>
-              <span className="mx-2">•</span>
-              <span>
-                {mod.storage_driver === 's3' ? 'S3 Storage' : 'Local Storage'}
-              </span>
             </div>
           </div>
           <div className="flex space-x-3">
