@@ -1,5 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import { ChevronRightIcon } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -34,6 +35,7 @@ interface Mod {
   name: string;
   slug: string;
   description: string;
+  icon_url?: string;
   visibility: 'public' | 'private' | 'unlisted';
   storage_driver: 'local';
 }
@@ -43,16 +45,34 @@ interface Props {
 }
 
 export default function EditMod({ mod }: Props) {
+  const [iconPreview, setIconPreview] = useState<string | null>(mod.icon_url || null);
+
   const { data, setData, patch, processing, errors } = useForm({
     name: mod.name,
     description: mod.description || '',
     visibility: mod.visibility,
     storage_driver: mod.storage_driver,
+    icon: null as File | null,
   });
 
-  const submit = (e: React.SubmitEvent) => {
+  const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setData('icon', file);
+      const reader = new FileReader();
+      reader.onload = (e) => setIconPreview(e.target?.result as string);
+      reader.readAsDataURL(file);
+    } else {
+      setData('icon', null);
+      setIconPreview(mod.icon_url || null);
+    }
+  };
+
+  const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    patch(`/dashboard/mods/${mod.slug}`);
+    patch(`/dashboard/mods/${mod.slug}`, {
+      forceFormData: true,
+    });
   };
 
   const deleteMod = () => {
@@ -131,6 +151,34 @@ export default function EditMod({ mod }: Props) {
                       {errors.description}
                     </p>
                   )}
+                </div>
+
+                <div>
+                  <Label htmlFor="icon">Mod Icon</Label>
+                  <div className="space-y-2">
+                    <Input
+                      id="icon"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleIconChange}
+                      className={errors.icon ? 'border-destructive' : ''}
+                    />
+                    {iconPreview && (
+                      <div className="mt-2">
+                        <img
+                          src={iconPreview}
+                          alt="Icon preview"
+                          className="h-16 w-16 rounded-lg object-cover border"
+                        />
+                      </div>
+                    )}
+                    {errors.icon && (
+                      <p className="text-sm text-destructive">{errors.icon}</p>
+                    )}
+                    <p className="text-sm text-muted-foreground">
+                      Optional. Upload a square image (PNG, JPG, GIF, WebP). Maximum size: 2MB.
+                    </p>
+                  </div>
                 </div>
 
                 <div>

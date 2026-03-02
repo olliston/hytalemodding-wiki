@@ -43,6 +43,7 @@ interface Mod {
   name: string;
   slug: string;
   description: string;
+  icon_url?: string;
   visibility: 'public' | 'private' | 'unlisted';
   storage_driver: 'local' | 's3';
   owner: User;

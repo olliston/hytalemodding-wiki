@@ -1,4 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -20,16 +21,34 @@ import AppLayout from '@/layouts/app-layout';
 import { visibilityOptions } from '@/utils/commonUtils';
 
 export default function CreateMod() {
+  const [iconPreview, setIconPreview] = useState<string | null>(null);
+
   const { data, setData, post, processing, errors } = useForm({
     name: '',
     description: '',
     visibility: 'private',
     storage_driver: 'local',
+    icon: null as File | null,
   });
 
-  const submit = (e: React.SubmitEvent) => {
+  const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setData('icon', file);
+      const reader = new FileReader();
+      reader.onload = (e) => setIconPreview(e.target?.result as string);
+      reader.readAsDataURL(file);
+    } else {
+      setData('icon', null);
+      setIconPreview(null);
+    }
+  };
+
+  const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    post('/dashboard/mods');
+    post('/dashboard/mods', {
+      forceFormData: true,
+    });
   };
 
   return (
@@ -80,6 +99,34 @@ export default function CreateMod() {
                     {errors.description}
                   </p>
                 )}
+              </div>
+
+              <div>
+                <Label htmlFor="icon">Mod Icon</Label>
+                <div className="space-y-2">
+                  <Input
+                    id="icon"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleIconChange}
+                    className={errors.icon ? 'border-destructive' : ''}
+                  />
+                  {iconPreview && (
+                    <div className="mt-2">
+                      <img
+                        src={iconPreview}
+                        alt="Icon preview"
+                        className="h-16 w-16 rounded-lg object-cover border"
+                      />
+                    </div>
+                  )}
+                  {errors.icon && (
+                    <p className="text-sm text-destructive">{errors.icon}</p>
+                  )}
+                  <p className="text-sm text-muted-foreground">
+                    Optional. Upload a square image (PNG, JPG, GIF, WebP). Maximum size: 2MB.
+                  </p>
+                </div>
               </div>
 
               <div>

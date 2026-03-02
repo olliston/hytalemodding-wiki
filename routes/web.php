@@ -49,6 +49,7 @@ Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified']], f
                     'slug' => $mod->slug,
                     'name' => $mod->name,
                     'description' => $mod->description,
+                    'icon_url' => $mod->icon_url,
                     'updated_at' => $mod->updated_at,
                     'pages_count' => $mod->pages_count,
                     'collaborators_count' => $mod->collaborators_count,
