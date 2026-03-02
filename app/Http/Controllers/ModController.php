@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -61,6 +62,7 @@ class ModController extends Controller
             'description' => 'nullable|string',
             'visibility' => 'required|in:public,private,unlisted',
             'storage_driver' => 'required|in:local,s3',
+            'icon' => 'nullable|file|image|max:2048|mimes:jpeg,png,gif,webp', // 2MB max for icons
         ]);
 
         $slug = Str::slug($validated['name']);
@@ -72,10 +74,21 @@ class ModController extends Controller
             $counter++;
         }
 
+        $iconUrl = null;
+        if ($request->hasFile('icon')) {
+            $iconFile = $request->file('icon');
+            $iconFilename = Str::uuid() . '.' . $iconFile->getClientOriginalExtension();
+            $iconPath = "mods/icons/{$iconFilename}";
+
+            $iconFile->storeAs('mods/icons', $iconFilename, 'public');
+            $iconUrl = Storage::disk('public')->url($iconPath);
+        }
+
         $mod = Mod::create([
             'name' => $validated['name'],
             'slug' => $slug,
             'description' => $validated['description'],
+            'icon_url' => $iconUrl,
             'owner_id' => Auth::id(),
             'visibility' => $validated['visibility'],
             'storage_driver' => $validated['storage_driver'],
@@ -147,6 +160,7 @@ class ModController extends Controller
             'description' => 'nullable|string',
             'visibility' => 'required|in:public,private,unlisted',
             'storage_driver' => 'required|in:local,s3',
+            'icon' => 'nullable|file|image|max:2048|mimes:jpeg,png,gif,webp',
         ]);
 
         if ($validated['name'] !== $mod->name) {
@@ -160,6 +174,20 @@ class ModController extends Controller
             }
 
             $validated['slug'] = $slug;
+        }
+
+        if ($request->hasFile('icon')) {
+            if ($mod->icon_url) {
+                $oldPath = str_replace('/storage/', '', parse_url($mod->icon_url, PHP_URL_PATH));
+                Storage::disk('public')->delete($oldPath);
+            }
+
+            $iconFile = $request->file('icon');
+            $iconFilename = Str::uuid() . '.' . $iconFile->getClientOriginalExtension();
+            $iconPath = "mods/icons/{$iconFilename}";
+
+            $iconFile->storeAs('mods/icons', $iconFilename, 'public');
+            $validated['icon_url'] = Storage::disk('public')->url($iconPath);
         }
 
         $mod->update($validated);

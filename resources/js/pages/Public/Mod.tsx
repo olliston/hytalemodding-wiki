@@ -19,6 +19,7 @@ interface Mod {
   name: string;
   slug: string;
   description: string;
+  icon_url?: string;
   visibility: 'public' | 'private' | 'unlisted';
   owner: User;
   root_pages: Page[];

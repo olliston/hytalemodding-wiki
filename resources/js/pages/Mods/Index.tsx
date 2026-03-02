@@ -25,6 +25,7 @@ interface Mod {
   name: string;
   slug: string;
   description: string;
+  icon_url?: string;
   visibility: 'public' | 'private' | 'unlisted';
   pages_count: number;
   collaborators_count: number;
@@ -85,7 +86,6 @@ export default function ModsIndex({ ownedMods, collaborativeMods }: Props) {
           )}
         </div>
 
-        {/* Collaborative Mods */}
         {collaborativeMods.length > 0 && (
           <div>
             <h2 className="mb-6 text-2xl font-semibold text-secondary-foreground">

@@ -10,6 +10,7 @@ export interface ModInfo {
   slug: string;
   name: string;
   description: string;
+  icon_url?: string;
   pages_count: number;
   collaborators_count: number;
   updated_at: Date;
