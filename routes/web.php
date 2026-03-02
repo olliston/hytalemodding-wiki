@@ -27,18 +27,20 @@ Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified']], f
             ->with(['pages' => function ($query) {
                 $query->orderBy('pages.updated_at', 'desc')->limit(5)->select('pages.id', 'pages.title', 'pages.slug', 'pages.updated_at', 'pages.mod_id');
             }])
+            ->withCount(['pages', 'collaborators'])
             ->orderBy('mods.updated_at', 'desc')
             ->limit(5)
-            ->select('mods.id', 'mods.name', 'mods.slug', 'mods.updated_at')
+            ->select('mods.id', 'mods.name', 'mods.slug', 'mods.updated_at', 'mods.description')
             ->get()
             ->merge(
                 $user->mods()
                     ->with(['pages' => function ($query) {
                         $query->orderBy('pages.updated_at', 'desc')->limit(5)->select('pages.id', 'pages.title', 'pages.slug', 'pages.updated_at', 'pages.mod_id');
                     }])
+                    ->withCount(['pages', 'collaborators'])
                     ->orderBy('mods.updated_at', 'desc')
                     ->limit(5)
-                    ->select('mods.id', 'mods.name', 'mods.slug', 'mods.updated_at')
+                    ->select('mods.id', 'mods.name', 'mods.slug', 'mods.updated_at', 'mods.description')
                     ->get()
             )
             ->sortByDesc('updated_at')
@@ -47,12 +49,15 @@ Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified']], f
                 return [
                     'slug' => $mod->slug,
                     'name' => $mod->name,
-                    'last_update_time' => $mod->updated_at,
+                    'description' => $mod->description,
+                    'updated_at' => $mod->updated_at,
+                    'pages_count' => $mod->pages_count,
+                    'collaborators_count' => $mod->collaborators_count,
                     'latest_pages' => $mod->pages->map(function ($page) {
                         return [
                             'title' => $page->title,
                             'slug' => $page->slug,
-                            'last_update' => $page->updated_at,
+                            'updated_at' => $page->updated_at,
                         ];
                     })->toArray(),
                 ];
