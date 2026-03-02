@@ -48,7 +48,7 @@ class ModController extends ClientController
         $pages = $mod->pages()->latest()->get()->map(function ($page) {
             return [
                 'id' => $page->id,
-                'name' => $page->name,
+                'title' => $page->title,
                 'slug' => $page->slug,
             ];
         });
