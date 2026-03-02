@@ -1,10 +1,10 @@
 import hljs from 'highlight.js';
 import { marked } from 'marked';
+import markedFootnote from 'marked-footnote';
+import { gfmHeadingId } from 'marked-gfm-heading-id';
 import { markedHighlight } from 'marked-highlight';
 import 'highlight.js/styles/github-dark.css';
 import { useEffect, useState } from 'react';
-import markedFootnote from 'marked-footnote';
-import { gfmHeadingId } from 'marked-gfm-heading-id';
 
 interface MarkdownRendererProps {
   content: string;
@@ -20,7 +20,7 @@ marked.use(
     },
   }),
   gfmHeadingId(),
-  markedFootnote()
+  markedFootnote(),
 );
 
 marked.setOptions({
