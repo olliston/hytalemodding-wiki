@@ -33,7 +33,7 @@ class ModController extends ClientController
     }
 
     /**
-     * Display all the pages of a mod.
+     * Display all the pages of a mod in hierarchical structure.
      */
     public function show(Request $request)
     {
@@ -45,17 +45,35 @@ class ModController extends ClientController
             return response()->json(['error' => 'Access denied. You do not have permission to view this mod.'], 403);
         }
 
-        $pages = $mod->pages()->latest()->get()->map(function ($page) {
-            return [
-                'id' => $page->id,
-                'title' => $page->title,
-                'slug' => $page->slug,
-            ];
-        });
+        $allPages = $mod->pages()->orderBy('order_index')->get();
+
+        $pages = $this->buildPageHierarchy($allPages);
 
         return response()->json([
             'pages' => $pages,
         ]);
+    }
+
+    /**
+     * Recursively build page hierarchy from flat collection.
+     */
+    private function buildPageHierarchy($pages, $parentId = null)
+    {
+        return $pages
+            ->filter(function ($page) use ($parentId) {
+                return $page->parent_id === $parentId;
+            })
+            ->map(function ($page) use ($pages) {
+                $children = $this->buildPageHierarchy($pages, $page->id);
+
+                return [
+                    'id' => $page->id,
+                    'title' => $page->title,
+                    'slug' => $page->slug,
+                    'children' => $children->values()->toArray(),
+                ];
+            })
+            ->values();
     }
 
     /**
@@ -76,18 +94,6 @@ class ModController extends ClientController
 
         return response()->json([
             'content' => $page->content,
-            'parent' => $page->parent ? [
-                'id' => $page->parent->id,
-                'title' => $page->parent->title,
-                'slug' => $page->parent->slug,
-            ] : null,
-            'children' => $page->children()->get()->map(function ($child) {
-                return [
-                    'id' => $child->id,
-                    'title' => $child->title,
-                    'slug' => $child->slug,
-                ];
-            }),
         ]);
     }
 }
