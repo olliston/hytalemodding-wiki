@@ -1,7 +1,7 @@
 <?php
 
 Route::group([
-    'prefix' => '/api',
+    'prefix' => '/',
     'middleware' => ['api.key'],
 ], function () {
     Route::get('/', fn () => response()->json(['message' => 'request success, your key works!']));

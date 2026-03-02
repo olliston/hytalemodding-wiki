@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'verified.email' => EnsureEmailIsVerified::class,
             'api.scope' => EnsureAPIScope::class,
+            'api.key' => AuthenticateAPIKey::class,
         ]);
 
         $middleware->web(append: [

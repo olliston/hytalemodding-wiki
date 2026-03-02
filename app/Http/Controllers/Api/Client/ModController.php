@@ -35,17 +35,14 @@ class ModController extends ClientController
      */
     public function show(Request $request)
     {
-        $mod_name = $request->route('mod');
+        $mod_id = $request->route('mod');
 
-        $mod = Mod::where('name', $mod_name)->firstOrFail();
+        $mod = Mod::where('id', $mod_id)->firstOrFail();
         $pages = $mod->pages()->latest()->get()->map(function ($page) {
             return [
                 'id' => $page->id,
                 'name' => $page->name,
                 'slug' => $page->slug,
-                'content' => $page->content,
-                'created_at' => $page->created_at->toISOString(),
-                'updated_at' => $page->updated_at->toISOString(),
             ];
         });
 
@@ -59,10 +56,10 @@ class ModController extends ClientController
      */
     public function getPageContent(Request $request)
     {
-        $mod_name = $request->route('mod');
+        $mod_id = $request->route('mod');
         $page_slug = $request->route('page');
 
-        $mod = Mod::where('name', $mod_name)->firstOrFail();
+        $mod = Mod::where('id', $mod_id)->firstOrFail();
         $page = $mod->pages()->where('slug', $page_slug)->firstOrFail();
 
         return response()->json([
