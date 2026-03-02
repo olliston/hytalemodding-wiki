@@ -23,26 +23,25 @@ Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified']], f
         $collaborativeModsCount = $user->mods()->count();
         $totalPagesCount = $user->ownedMods()->withCount('pages')->get()->sum('pages_count') +
             $user->mods()->withCount('pages')->get()->sum('pages_count');
-        $latestMods = $user->ownedMods()
+        $ownedMods = $user->ownedMods()
             ->with(['pages' => function ($query) {
-                $query->orderBy('pages.updated_at', 'desc')->limit(5)->select('pages.id', 'pages.title', 'pages.slug', 'pages.updated_at', 'pages.mod_id');
+                $query->orderBy('updated_at', 'desc')->limit(5);
             }])
             ->withCount(['pages', 'collaborators'])
-            ->orderBy('mods.updated_at', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->limit(5)
-            ->select('mods.id', 'mods.name', 'mods.slug', 'mods.updated_at', 'mods.description')
-            ->get()
-            ->merge(
-                $user->mods()
-                    ->with(['pages' => function ($query) {
-                        $query->orderBy('pages.updated_at', 'desc')->limit(5)->select('pages.id', 'pages.title', 'pages.slug', 'pages.updated_at', 'pages.mod_id');
-                    }])
-                    ->withCount(['pages', 'collaborators'])
-                    ->orderBy('mods.updated_at', 'desc')
-                    ->limit(5)
-                    ->select('mods.id', 'mods.name', 'mods.slug', 'mods.updated_at', 'mods.description')
-                    ->get()
-            )
+            ->get();
+
+        $collaborativeMods = $user->mods()
+            ->with(['pages' => function ($query) {
+                $query->orderBy('updated_at', 'desc')->limit(5);
+            }])
+            ->withCount(['pages', 'collaborators'])
+            ->orderBy('updated_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        $latestMods = $ownedMods->merge($collaborativeMods)
             ->sortByDesc('updated_at')
             ->take(5)
             ->map(function ($mod) {

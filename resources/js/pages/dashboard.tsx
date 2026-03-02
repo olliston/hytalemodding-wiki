@@ -9,6 +9,8 @@ import {
   HelpCircle,
   TrendingUp,
   EyeIcon,
+  UsersIcon,
+  FileTextIcon,
 } from 'lucide-react';
 import { useState } from 'react';
 import { QuickActionButton } from '@/components/dashboard/quick-action-button';
@@ -24,7 +26,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
-import type { BreadcrumbItem, DashboardStats, SharedData } from '@/types';
+import type {
+  BreadcrumbItem,
+  DashboardStats,
+  ModInfo,
+  SharedData,
+} from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -277,34 +284,9 @@ function RecentActivity({
           </TabsList>
 
           <TabsContent value="mods" className="mt-0 space-y-3">
-            {stats.recentMods?.length > 0 ? (
-              stats.recentMods.map((mod) => (
-                // TODO: Create RecentModCard component and replace this with <RecentModCard key={mod.id} mod={mod} />
-                <div
-                  key={mod.id}
-                  className="rounded-md border border-border/50 p-4 transition-colors hover:bg-accent"
-                >
-                  <h3 className="text-lg font-semibold">{mod.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {mod.description || 'No description provided'}
-                  </p>
-                  <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
-                    <span>
-                      {mod.pages_count}{' '}
-                      {mod.pages_count === 1 ? 'page' : 'pages'}
-                    </span>
-                    <span>
-                      {mod.collaborators_count}{' '}
-                      {mod.collaborators_count === 1
-                        ? 'collaborator'
-                        : 'collaborators'}
-                    </span>
-                    <span>
-                      Last updated:{' '}
-                      {new Date(mod.updated_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
+            {stats.latestMods?.length > 0 ? (
+              stats.latestMods.map((mod) => (
+                <RecentModCard key={mod.slug} mod={mod} />
               ))
             ) : (
               <div className="py-12 text-center">
@@ -347,5 +329,33 @@ function RecentActivity({
         </Tabs>
       </CardContent>
     </Card>
+  );
+}
+function RecentModCard({ mod }: { mod: ModInfo }) {
+  return (
+    <Link href={`/dashboard/mods/${mod.slug}`} className="block">
+      <div
+        key={mod.slug}
+        className="rounded-md border border-border/50 p-4 transition-colors hover:bg-accent"
+      >
+        <h3 className="text-lg font-semibold">{mod.name}</h3>
+        <p className="text-sm text-muted-foreground">
+          {mod.description || 'No description provided'}
+        </p>
+        <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground justify-between">
+          <span className='flex items-center gap-2'>
+            <FileTextIcon className="size-4" />
+            {mod.pages_count}
+          </span>
+          <span className="flex items-center gap-2">
+            <UsersIcon className="size-4" />
+            {mod.collaborators_count}
+          </span>
+          <span className='flex-1 text-end'>
+            Last updated: {new Date(mod.updated_at).toLocaleDateString()}
+          </span>
+        </div>
+      </div>
+    </Link>
   );
 }
