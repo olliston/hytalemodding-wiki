@@ -14,6 +14,7 @@ class ModController extends ClientController
     public function index()
     {
         $mods = Mod::where('visibility', 'public')
+            ->with('owner')
             ->latest()
             ->get();
 
@@ -24,6 +25,11 @@ class ModController extends ClientController
                     'name' => $mod->name,
                     'slug' => $mod->slug,
                     'description' => $mod->description,
+                    'author' => [
+                        'name' => $mod->owner->name,
+                        'username' => $mod->owner->username,
+                        'avatar_url' => $mod->owner->avatar_url,
+                    ],
                     'index' => $mod->indexPage ? [
                         'id' => $mod->indexPage->id,
                         'title' => $mod->indexPage->title,
