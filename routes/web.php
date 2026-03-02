@@ -25,20 +25,20 @@ Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified']], f
             $user->mods()->withCount('pages')->get()->sum('pages_count');
         $latestMods = $user->ownedMods()
             ->with(['pages' => function ($query) {
-                $query->latest()->limit(5)->select('id', 'title as name', 'slug', 'updated_at', 'mod_id');
+                $query->orderBy('pages.updated_at', 'desc')->limit(5)->select('pages.id', 'pages.title', 'pages.slug', 'pages.updated_at', 'pages.mod_id');
             }])
-            ->latest()
+            ->orderBy('mods.updated_at', 'desc')
             ->limit(5)
-            ->select('id', 'name', 'slug', 'updated_at')
+            ->select('mods.id', 'mods.name', 'mods.slug', 'mods.updated_at')
             ->get()
             ->merge(
                 $user->mods()
                     ->with(['pages' => function ($query) {
-                        $query->latest()->limit(5)->select('id', 'title as name', 'slug', 'updated_at', 'mod_id');
+                        $query->orderBy('pages.updated_at', 'desc')->limit(5)->select('pages.id', 'pages.title', 'pages.slug', 'pages.updated_at', 'pages.mod_id');
                     }])
-                    ->latest()
+                    ->orderBy('mods.updated_at', 'desc')
                     ->limit(5)
-                    ->select('id', 'name', 'slug', 'updated_at')
+                    ->select('mods.id', 'mods.name', 'mods.slug', 'mods.updated_at')
                     ->get()
             )
             ->sortByDesc('updated_at')
@@ -50,7 +50,7 @@ Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified']], f
                     'last_update_time' => $mod->updated_at,
                     'latest_pages' => $mod->pages->map(function ($page) {
                         return [
-                            'name' => $page->name,
+                            'title' => $page->title,
                             'slug' => $page->slug,
                             'last_update' => $page->updated_at,
                         ];
