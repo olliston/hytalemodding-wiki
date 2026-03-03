@@ -19,7 +19,6 @@ import { dashboard } from '@/routes';
 import { index as modsIndex } from '@/routes/mods';
 import type { SharedData } from '@/types';
 
-
 export function UserMenuContent() {
   const { auth } = usePage<SharedData>().props;
   const getInitials = useInitials();
@@ -31,11 +30,11 @@ export function UserMenuContent() {
           <Button variant="ghost" className="relative h-9 w-9 rounded-full">
             <Avatar className="h-8 w-8">
               <AvatarImage
-                src={auth.user?.avatar ?? ''}
-                alt={auth.user?.name ?? ''}
+                src={auth.user?.avatar}
+                alt={auth.user?.name}
               />
               <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-600 text-xs text-white">
-                {getInitials(auth.user?.name ?? '')}
+                {getInitials(auth.user?.name)}
               </AvatarFallback>
             </Avatar>
           </Button>
@@ -44,35 +43,29 @@ export function UserMenuContent() {
           <div className="flex items-center justify-start gap-2 p-2">
             <Avatar className="h-8 w-8">
               <AvatarImage
-                src={auth.user?.avatar ?? ''}
-                alt={auth.user?.name ?? ''}
+                src={auth.user?.avatar}
+                alt={auth.user?.name}
               />
               <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-600 text-xs text-white">
-                {getInitials(auth.user?.name ?? '')}
+                {getInitials(auth.user?.name)}
               </AvatarFallback>
             </Avatar>
-            <div className="flex flex-col space-y-1 truncate">
-              <Tooltip>
-                <TooltipTrigger>
-                  <p className="truncate text-sm font-medium">
-                    {auth.user?.name}
-                  </p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {auth.user?.email}
-                  </p>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <div className="flex flex-col space-y-1 truncate">
-                    <p className="truncate text-sm font-medium">
-                      {auth.user?.name}
-                    </p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {auth.user?.email}
-                    </p>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </div>
+            <Tooltip>
+              <TooltipTrigger>
+                <p className="truncate text-start text-sm font-medium">
+                  {auth.user?.name}
+                </p>
+                <p className="truncate text-start text-xs text-muted-foreground">
+                  {auth.user?.email}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm font-medium">{auth.user?.name}</p>
+                  <p className="text-xs">{auth.user?.email}</p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
           </div>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
