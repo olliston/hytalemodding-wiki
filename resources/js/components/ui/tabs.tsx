@@ -6,7 +6,9 @@ interface TabsContextValue {
   onValueChange: (value: string) => void;
 }
 
-const TabsContext = React.createContext<TabsContextValue | undefined>(undefined);
+const TabsContext = React.createContext<TabsContextValue | undefined>(
+  undefined,
+);
 
 function useTabsContext() {
   const context = React.useContext(TabsContext);
@@ -23,16 +25,31 @@ interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
-  ({ defaultValue, value: controlledValue, onValueChange, children, className, ...props }, ref) => {
-    const [internalValue, setInternalValue] = React.useState(defaultValue || '');
+  (
+    {
+      defaultValue,
+      value: controlledValue,
+      onValueChange,
+      children,
+      className,
+      ...props
+    },
+    ref,
+  ) => {
+    const [internalValue, setInternalValue] = React.useState(
+      defaultValue || '',
+    );
     const value = controlledValue ?? internalValue;
 
-    const handleValueChange = React.useCallback((newValue: string) => {
-      if (controlledValue === undefined) {
-        setInternalValue(newValue);
-      }
-      onValueChange?.(newValue);
-    }, [controlledValue, onValueChange]);
+    const handleValueChange = React.useCallback(
+      (newValue: string) => {
+        if (controlledValue === undefined) {
+          setInternalValue(newValue);
+        }
+        onValueChange?.(newValue);
+      },
+      [controlledValue, onValueChange],
+    );
 
     return (
       <TabsContext.Provider value={{ value, onValueChange: handleValueChange }}>
@@ -41,7 +58,7 @@ const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
         </div>
       </TabsContext.Provider>
     );
-  }
+  },
 );
 Tabs.displayName = 'Tabs';
 
@@ -53,7 +70,7 @@ const TabsList = React.forwardRef<
     ref={ref}
     className={cn(
       'inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground',
-      className
+      className,
     )}
     {...props}
   />
@@ -78,14 +95,14 @@ const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
         data-state={isActive ? 'active' : 'inactive'}
         onClick={() => onValueChange(value)}
         className={cn(
-          'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+          'inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium whitespace-nowrap ring-offset-background transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
           isActive && 'bg-background text-foreground shadow',
-          className
+          className,
         )}
         {...props}
       />
     );
-  }
+  },
 );
 TabsTrigger.displayName = 'TabsTrigger';
 
@@ -105,15 +122,15 @@ const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
         ref={ref}
         role="tabpanel"
         className={cn(
-          'mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-          className
+          'mt-2 ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none',
+          className,
         )}
         {...props}
       >
         {children}
       </div>
     );
-  }
+  },
 );
 TabsContent.displayName = 'TabsContent';
 
