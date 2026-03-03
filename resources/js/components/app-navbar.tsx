@@ -57,7 +57,7 @@ export default function AppNavbar() {
             className="flex items-center space-x-2 transition-opacity hover:opacity-80"
           >
             <HytaleModdingLogo variant="icon" size="md" />
-            <span className="bg-clip-text text-xl font-bold text-white">
+            <span className="bg-clip-text text-xl font-semibold text-white">
               HytaleModding
             </span>
           </Link>
