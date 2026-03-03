@@ -54,13 +54,14 @@ export default function Dashboard({ stats }: Props) {
             <div className="flex-1 lg:col-span-2">
               <RecentActivity stats={stats} />
             </div>
-            <div className='my-4'>
+            <div className="my-4">
               <Separator orientation="vertical" />
             </div>
             <div className="w-xs space-y-6">
               <QuickActions />
-              <Separator />
-
+              <div className="mx-4">
+                <Separator />
+              </div>
               <Stats stats={stats} totalMods={totalMods} />
             </div>
           </div>
@@ -188,44 +189,40 @@ function Stats({
   ];
 
   return (
-    <Card className="border-border/50">
-      <CardHeader>
-        <CardTitle className="text-base">Your Stats</CardTitle>
-      </CardHeader>
-      <CardContent className="px-0">
+    <div className="flex flex-col gap-4">
+      <div>
+        <h1 className="flex items-center gap-2 font-semibold">Your Stats</h1>
+      </div>
+      <div className="flex flex-col gap-2 rounded-lg border py-2">
         {dashboardStats.map((stat, index) => (
-          <Stat
-            key={stat.title}
-            title={stat.title}
-            value={stat.value}
-            icon={stat.icon}
-            isLast={index === dashboardStats.length - 1}
-          />
+          <>
+            <Stat
+              key={stat.title}
+              title={stat.title}
+              value={stat.value}
+              icon={stat.icon}
+            />
+            {index < dashboardStats.length - 1 && <Separator />}
+          </>
         ))}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 
   function Stat({
     title,
     value,
     icon: Icon,
-    isLast = false,
   }: {
     title: string;
     value: number;
     icon: React.ComponentType<{ className?: string }>;
-    isLast?: boolean;
   }) {
     return (
-      <div
-        className="flex items-center px-6 py-2 text-sm"
-        style={{
-          borderBottomWidth: isLast ? '0px' : '1px',
-        }}
-      >
-        <Icon className="mr-2 h-4 w-4 text-muted-foreground" />
-        <span className="text-muted-foreground">{title}</span>
+      <div className="mx-4 flex items-center text-sm">
+        <span className="flex items-center gap-2 text-muted-foreground">
+          <Icon className="size-4" /> {title}
+        </span>
         <span className="ml-auto font-mono font-semibold">{value}</span>
       </div>
     );
