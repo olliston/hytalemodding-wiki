@@ -36,6 +36,19 @@ export const formatDate = (date: string) => {
   });
 };
 
+export const getVisibilityColor = (visibility: string) => {
+  switch (visibility) {
+    case 'public':
+      return 'bg-transparent text-cyan-400 border border-cyan-400 font-bold';
+    case 'private':
+      return 'bg-transparent text-lime-400 border border-lime-400 font-bold';
+    case 'unlisted':
+      return 'bg-transparent text-yellow-400 border border-yellow-400 font-bold';
+    default:
+      return 'bg-transparent text-gray-400 border border-gray-400 font-bold';
+  }
+};
+
 export const getRoleColor = (role: string) => {
   switch (role) {
     case 'owner':
