@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
-import { ChevronRightIcon } from 'lucide-react';
+import { ChevronRightIcon, PencilIcon, XIcon } from 'lucide-react';
 import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -21,14 +22,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
-import { visibilityOptions } from '@/utils/commonUtils';
+import { cn } from '@/lib/utils';
+import { getVisibilityColor, visibilityOptions } from '@/utils/commonUtils';
 
 interface Mod {
   id: string;
@@ -70,7 +68,17 @@ export default function EditMod({ mod }: Props) {
     }
   };
 
-  const submit = (e: React.FormEvent) => {
+  const removeIcon = () => {
+    setData('icon', null);
+    setIconPreview(null);
+    // Reset file input
+    const fileInput = document.getElementById('icon') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
+  const submit = (e: React.SubmitEvent) => {
     e.preventDefault();
     patch(`/dashboard/mods/${mod.slug}`, {
       forceFormData: true,
@@ -96,8 +104,9 @@ export default function EditMod({ mod }: Props) {
     <AppLayout>
       <Head title={`Edit ${mod.name}`} />
 
-      <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-8">
+      <div className="space-y-6">
+        {/* Navigation */}
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <nav className="mb-4 text-sm text-primary">
             <a href={`/dashboard/mods/${mod.slug}`} className="hover:underline">
               {mod.name}
@@ -105,159 +114,188 @@ export default function EditMod({ mod }: Props) {
             <ChevronRightIcon className="m-1 inline h-4 w-4" />
             <span>Settings</span>
           </nav>
-          <h1 className="text-3xl font-bold text-primary">Mod Settings</h1>
-          <p className="mt-2 text-muted-foreground">
-            Update your mod's details and configuration
-          </p>
         </div>
 
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Edit Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={submit} className="space-y-6">
-                <div>
-                  <Label htmlFor="name">Mod Name *</Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    value={data.name}
-                    onChange={(e) => setData('name', e.target.value)}
-                    placeholder="My Awesome Mod"
-                    className={errors.name ? 'text-destructive' : ''}
-                  />
-                  {errors.name && (
-                    <p className="mt-1 text-sm text-destructive">
-                      {errors.name}
-                    </p>
-                  )}
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Changing the name will update the URL slug
-                  </p>
+        <form onSubmit={submit} className="mt-12 space-y-6">
+          {/* Header Section - Matching Show.tsx structure */}
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="mb-2 flex items-center space-x-3">
+                  <div className="group relative flex-1">
+                    <Label htmlFor="name" className="sr-only">
+                      Mod Name
+                    </Label>
+                    <Input
+                      id="name"
+                      type="text"
+                      value={data.name}
+                      onChange={(e) => setData('name', e.target.value)}
+                      placeholder="My Awesome Mod"
+                      className={cn(
+                        'h-auto w-full border-2 border-muted-foreground/30 px-3 py-2 text-3xl font-bold tracking-tight hover:border-muted-foreground/50 focus:border-primary',
+                        errors.name ? 'border-destructive' : '',
+                      )}
+                    />
+                    <PencilIcon className="absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                    {errors.name && (
+                      <p className="mt-1 text-sm text-destructive">
+                        {errors.name}
+                      </p>
+                    )}
+                  </div>
                 </div>
-
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={data.description}
-                    onChange={(e) => setData('description', e.target.value)}
-                    placeholder="A brief description of what your mod does..."
-                    rows={4}
-                    className={errors.description ? 'border-destructive' : ''}
-                  />
+                <div className="group relative mb-4">
+                  <Label htmlFor="description" className="sr-only">
+                    Description
+                  </Label>
+                  <div className="relative">
+                    <Textarea
+                      id="description"
+                      value={data.description}
+                      onChange={(e) => setData('description', e.target.value)}
+                      placeholder="A brief description of what your mod does..."
+                      rows={2}
+                      className={cn(
+                        'w-full resize-none border-2 border-muted-foreground/30 px-3 py-2 text-muted-foreground hover:border-muted-foreground/50 focus:border-primary',
+                        errors.description ? 'border-destructive' : '',
+                      )}
+                    />
+                    <PencilIcon className="absolute top-3 right-3 h-4 w-4 text-muted-foreground" />
+                  </div>
                   {errors.description && (
                     <p className="mt-1 text-sm text-destructive">
                       {errors.description}
                     </p>
                   )}
                 </div>
+              </div>
+            </div>
+          </div>
 
-                <div>
-                  <Label htmlFor="icon">Mod Icon</Label>
-                  <div className="space-y-2">
-                    <Input
-                      id="icon"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleIconChange}
-                      className={errors.icon ? 'border-destructive' : ''}
-                    />
+          {/* Main Content Area - Additional Settings */}
+          <div className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
+            <div className="space-y-6">
+              <Card className="bg-transparent">
+                <CardHeader>
+                  <CardTitle>Additional Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <Label htmlFor="visibility">Visibility</Label>
+                    <Select
+                      value={data.visibility}
+                      onValueChange={(
+                        value: 'public' | 'unlisted' | 'private',
+                      ) => setData('visibility', value)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {visibilityOptions.map((option) => (
+                          <SelectItem
+                            key={option.value}
+                            value={option.value}
+                            className="flex w-full"
+                          >
+                            <div className="flex w-full items-center justify-between gap-4">
+                              <Badge
+                                variant="outline"
+                                className={getVisibilityColor(option.value)}
+                              >
+                                {option.label}
+                              </Badge>
+                              <div className="text-sm text-muted-foreground">
+                                {option.description}
+                              </div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.visibility && (
+                      <p className="mt-1 text-sm text-destructive">
+                        {errors.visibility}
+                      </p>
+                    )}
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Control who can access your mod documentation
+                    </p>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <Label htmlFor="icon">Mod Icon</Label>
+                    <div className="relative mt-2">
+                      <Input
+                        id="icon"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleIconChange}
+                        className={cn(
+                          'pr-10',
+                          errors.icon ? 'border-destructive' : '',
+                        )}
+                      />
+                      {(iconPreview || data.icon) && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="hover:text-destructive-foreground absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 hover:bg-muted"
+                          onClick={removeIcon}
+                        >
+                          <XIcon className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                     {iconPreview && (
-                      <div className="mt-2">
+                      <div className="mt-4 flex justify-center">
                         <img
                           src={iconPreview}
                           alt="Icon preview"
-                          className="h-16 w-16 rounded-lg border object-cover"
+                          className="h-24 w-24 rounded-lg border object-cover"
                         />
                       </div>
                     )}
                     {errors.icon && (
-                      <p className="text-sm text-destructive">{errors.icon}</p>
+                      <p className="mt-2 text-sm text-destructive">
+                        {errors.icon}
+                      </p>
                     )}
-                    <p className="text-sm text-muted-foreground">
+                    <p className="mt-2 text-sm text-muted-foreground">
                       Optional. Upload a square image (PNG, JPG, GIF, WebP).
                       Maximum size: 2MB.
                     </p>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
 
-                <div>
-                  <Label htmlFor="visibility">Visibility *</Label>
-                  <Select
-                    value={data.visibility}
-                    onValueChange={(value: 'public' | 'unlisted' | 'private') =>
-                      setData('visibility', value)
-                    }
-                  >
-                    <SelectTrigger
-                      className={errors.visibility ? 'border-destructive' : ''}
-                    >
-                      <SelectValue placeholder="Choose visibility" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {visibilityOptions.map((option) => (
-                        <SelectItem
-                          key={option.value}
-                          value={option.value}
-                          className="flex w-full"
-                        >
-                          <div className="hidden w-full items-center justify-between gap-4 sm:flex">
-                            <div className="font-medium">{option.label}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {option.description}
-                            </div>
-                          </div>
+          {/* Action Buttons at Bottom */}
+          <div className="mx-auto mt-8 max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-end space-x-3 border-t pt-6">
+              <Button type="button" variant="outline" asChild>
+                <a href={`/dashboard/mods/${mod.slug}`}>Cancel</a>
+              </Button>
+              <Button type="submit" disabled={processing}>
+                {processing ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </div>
+        </form>
 
-                          {/* Mobile view */}
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <div className="flex w-full items-center justify-between gap-4 sm:hidden">
-                                <div className="font-medium">
-                                  {option.label}
-                                </div>
-                                <div className="truncate text-sm text-muted-foreground">
-                                  {option.description}
-                                </div>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <div className="text-sm text-muted-foreground">
-                                {option.description}
-                              </div>
-                            </TooltipContent>
-                          </Tooltip>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.visibility && (
-                    <p className="mt-1 text-sm text-destructive">
-                      {errors.visibility}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between pt-4">
-                  <Button type="button" variant="outline" asChild>
-                    <a href={`/dashboard/mods/${mod.slug}`}>Cancel</a>
-                  </Button>
-                  <Button type="submit" disabled={processing}>
-                    {processing ? 'Saving...' : 'Save Changes'}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-
+        {/* Danger Zone - Outside form */}
+        <div className="mx-auto mt-16 max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
           <Card className="border-destructive">
             <CardHeader>
               <CardTitle className="text-destructive">Danger Zone</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center justify-between space-x-4">
                 <div>
                   <h3 className="text-lg font-medium">Delete Mod</h3>
                   <p className="text-sm text-muted-foreground">
