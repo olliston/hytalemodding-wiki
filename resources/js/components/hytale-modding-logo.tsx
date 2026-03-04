@@ -19,7 +19,11 @@ export default function HytaleModdingLogo({
     lg: actualVariant === 'icon' ? 'h-10' : 'h-16',
   };
 
-  const imageSrc =
+  const lightThemeImageSrc =
+    actualVariant === 'icon'
+      ? '/logo_dark.png'
+      : '/banner_transparent_dark.png';
+  const darkThemeImageSrc =
     actualVariant === 'icon'
       ? '/logo_light.png'
       : '/banner_transparent_light.png';
@@ -30,9 +34,14 @@ export default function HytaleModdingLogo({
   return (
     <div className={`flex items-center ${className}`}>
       <img
-        src={imageSrc}
+        src={lightThemeImageSrc}
         alt={altText}
-        className={`${sizeClasses[size]} w-auto object-contain dark:brightness-0 dark:invert`}
+        className={`${sizeClasses[size]} w-auto object-contain dark:hidden`}
+      />
+      <img
+        src={darkThemeImageSrc}
+        alt={altText}
+        className={`${sizeClasses[size]} hidden w-auto object-contain dark:block`}
       />
     </div>
   );
