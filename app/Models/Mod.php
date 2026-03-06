@@ -19,10 +19,12 @@ class Mod extends Model
         'owner_id',
         'visibility',
         'storage_driver',
+        'external_access',
     ];
 
     protected $casts = [
         'id' => 'string',
+        'external_access' => 'boolean',
     ];
 
     protected static function boot()
