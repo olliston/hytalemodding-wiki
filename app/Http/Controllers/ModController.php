@@ -189,6 +189,8 @@ class ModController extends Controller
 
             $iconFile->storeAs('mods/icons', $iconFilename, 'public');
             $validated['icon_url'] = Storage::disk('public')->url($iconPath);
+        } else {
+            $validated['icon_url'] = null;
         }
 
         $mod->update($validated);
