@@ -3,7 +3,7 @@ import { type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface QuickActionButtonProps {
-  icon: LucideIcon;
+  icon?: LucideIcon;
   label: string;
   description: string;
   href: string;
@@ -39,7 +39,7 @@ export function QuickActionButton({
         <div className="flex items-start gap-3">
           <div className="flex min-w-0 flex-1 flex-col gap-2">
             <h4 className="flex items-center gap-2 text-sm font-semibold transition-colors group-hover:text-primary">
-              <Icon className="size-4" />
+              {Icon && <Icon className="size-4" />}
               {label}
             </h4>
             <p className="text-xs text-muted-foreground">{description}</p>

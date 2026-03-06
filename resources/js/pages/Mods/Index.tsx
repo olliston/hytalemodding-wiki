@@ -18,7 +18,7 @@ import {
 import { useFlashMessages } from '@/hooks/useFlashMessages';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
-import { formatDate } from '@/utils/commonUtils';
+import { formatDate, getVisibilityColor } from '@/utils/commonUtils';
 
 interface Mod {
   id: string;
@@ -102,19 +102,6 @@ export default function ModsIndex({ ownedMods, collaborativeMods }: Props) {
     </AppLayout>
   );
 }
-
-const getVisibilityColor = (visibility: string) => {
-  switch (visibility) {
-    case 'public':
-      return 'bg-green-100 text-green-800';
-    case 'private':
-      return 'bg-red-100 text-red-800';
-    case 'unlisted':
-      return 'bg-yellow-100 text-yellow-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
 
 function ModCard({ mod }: { mod: Mod }) {
   return (

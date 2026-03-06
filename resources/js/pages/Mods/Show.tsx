@@ -1,19 +1,26 @@
 import {
   BookOpenIcon,
   PlusIcon,
-  CogIcon,
   UsersIcon,
   EyeIcon,
   PencilIcon,
 } from '@heroicons/react/24/outline';
 import { Head } from '@inertiajs/react';
+import { Plus } from 'lucide-react';
+import { QuickActionButton } from '@/components/dashboard/quick-action-button';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { useFlashMessages } from '@/hooks/useFlashMessages';
 import AppLayout from '@/layouts/app-layout';
+import {
+  formatDate,
+  getRoleColor,
+  getVisibilityColor,
+} from '@/utils/commonUtils';
 
 interface Page {
   id: string;
@@ -61,42 +68,6 @@ interface Props {
 
 export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
   useFlashMessages();
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  const getVisibilityColor = (visibility: string) => {
-    switch (visibility) {
-      case 'public':
-        return 'bg-green-100 text-green-800';
-      case 'private':
-        return 'bg-red-100 text-red-800';
-      case 'unlisted':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'owner':
-        return 'bg-purple-100 text-purple-800';
-      case 'admin':
-        return 'bg-blue-100 text-blue-800';
-      case 'editor':
-        return 'bg-green-100 text-green-800';
-      case 'viewer':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   const renderPageTree = (pages: Page[], level = 0) => {
     return pages.map((page) => (
@@ -172,132 +143,100 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
                 </a>
               </Button>
             )}
-            {canEdit && (
-              <Button asChild>
-                <a href={`/dashboard/mods/${mod.slug}/pages/create`}>
-                  <PlusIcon className="mr-2 h-4 w-4" />
-                  New Page
-                </a>
-              </Button>
-            )}
-            {canManage && (
-              <Button variant="outline" asChild>
-                <a href={`/dashboard/mods/${mod.slug}/edit`}>
-                  <CogIcon className="mr-2 h-4 w-4" />
-                  Settings
-                </a>
-              </Button>
-            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {/* Main Content */}
-          <div className="space-y-6 lg:col-span-2">
-            {/* Index Page */}
-            {mod.index_page && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <BookOpenIcon className="mr-2 h-5 w-5 text-primary" />
-                    {mod.index_page.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <MarkdownRenderer content={mod.index_page.content || ''} />
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      Updated {formatDate(mod.index_page.updated_at)}
-                    </span>
-                    <Button variant="outline" size="sm" asChild>
-                      <a
-                        href={`/dashboard/mods/${mod.slug}/pages/${mod.index_page.slug}`}
-                      >
-                        Read More
-                      </a>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+        {/* Sidebar */}
+        <div className="relative z-10 mx-auto max-w-7xl space-y-8 px-4 pb-8">
+          <div className="flex items-stretch gap-6 not-lg:flex-col">
+            <div className="flex-1 lg:col-span-2">
+              <div className="space-y-6 lg:col-span-2">
+                {/* Index Page */}
+                {mod.index_page && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <BookOpenIcon className="mr-2 h-5 w-5 text-primary" />
+                        {mod.index_page.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <MarkdownRenderer
+                        content={mod.index_page.content || ''}
+                      />
+                      <div className="mt-4 flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">
+                          Updated {formatDate(mod.index_page.updated_at)}
+                        </span>
+                        <Button size="sm" asChild>
+                          <a
+                            href={`/dashboard/mods/${mod.slug}/pages/${mod.index_page.slug}`}
+                          >
+                            Read More
+                          </a>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-            {/* Pages Tree */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Pages</CardTitle>
-                  {canEdit && (
-                    <Button size="sm" asChild>
-                      <a href={`/dashboard/mods/${mod.slug}/pages/create`}>
-                        <PlusIcon className="mr-2 h-4 w-4" />
-                        Add Page
-                      </a>
-                    </Button>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                {mod.root_pages.length === 0 ? (
-                  <div className="py-8 text-center">
-                    <BookOpenIcon className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-                    <h3 className="mb-2 text-lg font-medium">No pages yet</h3>
-                    <p className="mb-4 text-muted-foreground">
-                      Start documenting your mod by creating your first page
-                    </p>
+                <Separator />
+
+                {/* Pages Tree */}
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <h1 className="font-semibold">Pages</h1>
                     {canEdit && (
-                      <Button asChild>
+                      <Button size="sm" variant="outline" asChild>
                         <a href={`/dashboard/mods/${mod.slug}/pages/create`}>
-                          Create First Page
+                          <PlusIcon className="mr-2 h-4 w-4" />
+                          Add Page
                         </a>
                       </Button>
                     )}
                   </div>
-                ) : (
-                  <div className="space-y-1">
-                    {renderPageTree(mod.root_pages)}
+                  <div className="flex flex-col">
+                    {mod.root_pages.length === 0 ? (
+                      <div className="py-8 text-center">
+                        <BookOpenIcon className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                        <h3 className="mb-2 text-lg font-medium">
+                          No pages yet
+                        </h3>
+                        <p className="mb-4 text-muted-foreground">
+                          Start documenting your mod by creating your first page
+                        </p>
+                        {canEdit && (
+                          <Button asChild>
+                            <a
+                              href={`/dashboard/mods/${mod.slug}/pages/create`}
+                            >
+                              Create First Page
+                            </a>
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        {renderPageTree(mod.root_pages)}
+                      </div>
+                    )}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {canEdit && (
-                  <>
-                    <Button className="w-full" asChild>
-                      <a href={`/dashboard/mods/${mod.slug}/pages/create`}>
-                        <PlusIcon className="mr-2 h-4 w-4" />
-                        New Page
-                      </a>
-                    </Button>
-                    <Button variant="outline" className="w-full" asChild>
-                      <a href={`/dashboard/mods/${mod.slug}/files`}>
-                        Upload Files
-                      </a>
-                    </Button>
-                  </>
-                )}
-                <Button variant="outline" className="w-full" asChild>
-                  <a href={`/dashboard/mods/${mod.slug}/pages`}>
-                    View All Pages
-                  </a>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Collaborators */}
-            {(canManage || mod.collaborators.length > 0) && (
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle>Collaborators</CardTitle>
+                </div>
+              </div>
+            </div>
+            <div className="my-4">
+              <Separator orientation="vertical" />
+            </div>
+            <div className="w-xs space-y-6">
+              <QuickActions mod={mod} />
+              <div className="mx-4">
+                <Separator />
+              </div>
+              {/* Collaborators */}
+              {(canManage || mod.collaborators.length > 0) && (
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <h1 className="font-semibold">Collaborators</h1>
                     {canManage && (
                       <Button size="sm" variant="outline" asChild>
                         <a href={`/dashboard/mods/${mod.slug}/collaborators`}>
@@ -307,70 +246,112 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
                       </Button>
                     )}
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {/* Owner */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-purple-100 font-medium text-purple-800">
-                            {mod.owner.name.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="ml-3">
-                          <p className="text-sm font-medium">
-                            {mod.owner.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            @{mod.owner.username}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge className={getRoleColor('owner')}>Owner</Badge>
-                    </div>
-
-                    {/* Collaborators */}
-                    {mod.collaborators.map((collaborator) => (
-                      <div
-                        key={collaborator.id}
-                        className="flex items-center justify-between"
-                      >
+                  <div className="flex flex-col gap-2">
+                    <div className="space-y-3">
+                      {/* Owner */}
+                      <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="bg-muted font-medium">
-                              {collaborator.name.charAt(0).toUpperCase()}
+                          <Avatar className="h-8 w-8 overflow-hidden rounded-full">
+                            <AvatarImage
+                              src={mod.owner.avatar_url}
+                              alt={mod.owner.name}
+                            />
+                            <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                              {mod.owner.name.charAt(0).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <div className="ml-3">
                             <p className="text-sm font-medium">
-                              {collaborator.name}
+                              {mod.owner.name}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              @{collaborator.username}
+                              @{mod.owner.username}
                             </p>
                           </div>
                         </div>
-                        <Badge
-                          className={getRoleColor(collaborator.pivot.role)}
-                        >
-                          {collaborator.pivot.role}
-                        </Badge>
+                        <Badge className={getRoleColor('owner')}>Owner</Badge>
                       </div>
-                    ))}
 
-                    {mod.collaborators.length === 0 && (
-                      <p className="py-4 text-center text-sm text-muted-foreground">
-                        No collaborators yet
-                      </p>
-                    )}
+                      {/* Collaborators */}
+                      {mod.collaborators.map((collaborator) => (
+                        <div
+                          key={collaborator.id}
+                          className="flex items-center justify-between"
+                        >
+                          <div className="flex items-center">
+                            <Avatar className="h-8 w-8 overflow-hidden rounded-full">
+                              <AvatarImage
+                                src={collaborator.avatar_url}
+                                alt={collaborator.name}
+                              />
+                              <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                {collaborator.name.charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="ml-3">
+                              <p className="text-sm font-medium">
+                                {collaborator.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                @{collaborator.username}
+                              </p>
+                            </div>
+                          </div>
+                          <Badge
+                            className={getRoleColor(collaborator.pivot.role)}
+                          >
+                            {collaborator.pivot.role}
+                          </Badge>
+                        </div>
+                      ))}
+
+                      {mod.collaborators.length === 0 && (
+                        <p className="py-4 text-center text-sm text-muted-foreground">
+                          No collaborators yet
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
     </AppLayout>
+  );
+}
+
+function QuickActions({ mod }: { mod: Mod }) {
+  return (
+    <div className="flex flex-col gap-4">
+      <div>
+        <h1 className="flex items-center gap-2 font-semibold">Quick Actions</h1>
+      </div>
+      <div className="flex flex-col gap-2">
+        <QuickActionButton
+          icon={Plus}
+          label="New Page"
+          description="Start a new Page for your mod documentation"
+          href={`/dashboard/mods/${mod.slug}/pages/create`}
+          variant="primary"
+        />
+        <QuickActionButton
+          label="Upload Files"
+          description="Upload and manage files for your mod documentation"
+          href={`/dashboard/mods/${mod.slug}/files`}
+        />
+        <QuickActionButton
+          label="View all Pages"
+          description="Manage your mod pages"
+          href={`/dashboard/mods/${mod.slug}/pages`}
+        />
+        <QuickActionButton
+          label="Settings"
+          description="Manage your mod settings"
+          href={`/dashboard/mods/${mod.slug}/edit`}
+        />
+      </div>
+    </div>
   );
 }
