@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
 import { visibilityOptions } from '@/utils/commonUtils';
+import { Switch } from '@/components/ui/switch';
 
 interface Mod {
   id: string;
@@ -38,6 +39,7 @@ interface Mod {
   icon_url?: string;
   visibility: 'public' | 'private' | 'unlisted';
   storage_driver: 'local';
+  external_access: boolean;
 }
 
 interface Props {
@@ -54,6 +56,7 @@ export default function EditMod({ mod }: Props) {
     description: mod.description || '',
     visibility: mod.visibility,
     storage_driver: mod.storage_driver,
+    external_access: mod.external_access || false,
     icon: null as File | null,
   });
 
@@ -236,6 +239,27 @@ export default function EditMod({ mod }: Props) {
                   {errors.visibility && (
                     <p className="mt-1 text-sm text-destructive">
                       {errors.visibility}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center space-x-3">
+                  <Switch
+                    id="external_access"
+                    checked={data.external_access}
+                    onCheckedChange={(checked: boolean) =>
+                      setData('external_access', checked)
+                    }
+                  />
+                  <div>
+                    <Label htmlFor="external_access">External Access</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Allow external applications to access this mod via API
+                    </p>
+                  </div>
+                  {errors.external_access && (
+                    <p className="mt-1 text-sm text-destructive">
+                      {errors.external_access}
                     </p>
                   )}
                 </div>

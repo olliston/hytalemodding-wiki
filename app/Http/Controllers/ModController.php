@@ -161,6 +161,7 @@ class ModController extends Controller
             'visibility' => 'required|in:public,private,unlisted',
             'storage_driver' => 'required|in:local,s3',
             'icon' => 'nullable|file|image|max:2048|mimes:jpeg,png,gif,webp',
+            'external_access' => 'nullable|boolean',
         ]);
 
         if ($validated['name'] !== $mod->name) {
