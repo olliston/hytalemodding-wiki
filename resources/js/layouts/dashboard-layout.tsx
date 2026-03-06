@@ -10,7 +10,6 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="flex min-h-screen flex-col bg-background font-sans">
-      <WIPBanner />
       <AppNavbar />
       <main className="w-full flex-1">
         <div className="space-y-6">{children}</div>
