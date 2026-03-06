@@ -14,6 +14,7 @@ class ModController extends ClientController
     public function index()
     {
         $mods = Mod::where('visibility', 'public')
+            ->where('external_access', true)
             ->with('owner')
             ->latest()
             ->get();
@@ -50,6 +51,8 @@ class ModController extends ClientController
         $mod_id = $request->route('mod');
 
         $mod = Mod::where('id', $mod_id)
+            ->where('visibility', 'public')
+            ->where('external_access', true)
             ->with('owner')
             ->firstOrFail();
 
@@ -110,7 +113,11 @@ class ModController extends ClientController
         $mod_id = $request->route('mod');
         $page_slug = $request->route('page');
 
-        $mod = Mod::where('id', $mod_id)->firstOrFail();
+        $mod = Mod::where('id', $mod_id)
+            ->where('visibility', 'public')
+            ->where('external_access', true)
+            ->with('owner')
+            ->firstOrFail();
 
         if (! $mod->canBeAccessedBy(Auth::user())) {
             return response()->json(['error' => 'Access denied. You do not have permission to view this mod.'], 403);
