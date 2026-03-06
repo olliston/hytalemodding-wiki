@@ -39,6 +39,7 @@ class SeedPageViews extends Command
 
         if ($pages->isEmpty()) {
             $this->error('No published pages found. Please create some pages first.');
+
             return;
         }
 

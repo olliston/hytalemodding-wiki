@@ -23,11 +23,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 import { getVisibilityColor, visibilityOptions } from '@/utils/commonUtils';
-import { Switch } from '@/components/ui/switch';
 
 interface Mod {
   id: string;
@@ -74,7 +74,6 @@ export default function EditMod({ mod }: Props) {
   const removeIcon = () => {
     setData('icon', null);
     setIconPreview(null);
-    // Reset file input
     const fileInput = document.getElementById('icon') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
@@ -89,7 +88,6 @@ export default function EditMod({ mod }: Props) {
   };
 
   const deleteMod = () => {
-    // Handle delete
     fetch(`/dashboard/mods/${mod.slug}`, {
       method: 'DELETE',
       headers: {
@@ -108,7 +106,6 @@ export default function EditMod({ mod }: Props) {
       <Head title={`Edit ${mod.name}`} />
 
       <div className="space-y-6">
-        {/* Navigation */}
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <nav className="mb-4 text-sm text-primary">
             <a href={`/dashboard/mods/${mod.slug}`} className="hover:underline">
@@ -120,7 +117,6 @@ export default function EditMod({ mod }: Props) {
         </div>
 
         <form onSubmit={submit} className="mt-12 space-y-6">
-          {/* Header Section - Matching Show.tsx structure */}
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -176,7 +172,6 @@ export default function EditMod({ mod }: Props) {
             </div>
           </div>
 
-          {/* Main Content Area - Additional Settings */}
           <div className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
             <div className="space-y-6">
               <Card className="bg-transparent">
@@ -273,35 +268,32 @@ export default function EditMod({ mod }: Props) {
                       Maximum size: 2MB.
                     </p>
                   </div>
+                  <Separator />
+                  <div className="flex items-center space-x-3">
+                    <Switch
+                      id="external_access"
+                      checked={data.external_access}
+                      onCheckedChange={(checked: boolean) =>
+                        setData('external_access', checked)
+                      }
+                    />
+                    <div>
+                      <Label htmlFor="external_access">External Access</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Allow external applications to access this mod via API
+                      </p>
+                    </div>
+                    {errors.external_access && (
+                      <p className="mt-1 text-sm text-destructive">
+                        {errors.external_access}
+                      </p>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </div>
           </div>
 
-
-                <div className="flex items-center space-x-3">
-                  <Switch
-                    id="external_access"
-                    checked={data.external_access}
-                    onCheckedChange={(checked: boolean) =>
-                      setData('external_access', checked)
-                    }
-                  />
-                  <div>
-                    <Label htmlFor="external_access">External Access</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Allow external applications to access this mod via API
-                    </p>
-                  </div>
-                  {errors.external_access && (
-                    <p className="mt-1 text-sm text-destructive">
-                      {errors.external_access}
-                    </p>
-                  )}
-                </div>
-
-          
-          {/* Action Buttons at Bottom */}
           <div className="mx-auto mt-8 max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-end space-x-3 border-t pt-6">
               <Button type="button" variant="outline" asChild>
@@ -314,7 +306,6 @@ export default function EditMod({ mod }: Props) {
           </div>
         </form>
 
-        {/* Danger Zone - Outside form */}
         <div className="mx-auto mt-16 max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
           <Card className="border-destructive">
             <CardHeader>
