@@ -29,7 +29,6 @@ export default function AppNavbar() {
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-        {/* Logo */}
         <div className="flex items-center space-x-4">
           <Link
             href={dashboard().url}
@@ -42,7 +41,6 @@ export default function AppNavbar() {
           </Link>
         </div>
 
-        {/* Desktop Navigation */}
         <div className="hidden flex-1 items-center justify-end md:flex">
           <NavigationMenu>
             <NavigationMenuList className="flex space-x-1">
@@ -67,11 +65,9 @@ export default function AppNavbar() {
           </NavigationMenu>
         </div>
 
-        {/* Actions */}
         <div className="ml-8 flex items-center space-x-4">
           <UserMenuContent />
 
-          {/* Mobile Menu */}
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
@@ -100,7 +96,6 @@ export default function AppNavbar() {
                   />
                 </div>
 
-                {/* Mobile Navigation */}
                 <div className="flex flex-col space-y-3">
                   {mainNavItems.map((item, index) => (
                     <Link

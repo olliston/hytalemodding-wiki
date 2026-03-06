@@ -1,7 +1,6 @@
 import { Toaster } from 'sileo';
 import AppFooter from '@/components/app-footer';
 import AppNavbar from '@/components/app-navbar';
-import WIPBanner from '@/components/wip-banner';
 
 export default function DashboardLayout({
   children,

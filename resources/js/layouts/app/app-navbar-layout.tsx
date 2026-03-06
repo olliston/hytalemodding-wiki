@@ -2,7 +2,6 @@ import { Toaster } from 'sileo';
 import AppFooter from '@/components/app-footer';
 import AppNavbar from '@/components/app-navbar';
 import { Breadcrumbs } from '@/components/breadcrumbs';
-import WIPBanner from '@/components/wip-banner';
 import type { AppLayoutProps } from '@/types';
 
 export default function AppNavbarLayout({
@@ -11,7 +10,6 @@ export default function AppNavbarLayout({
 }: AppLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col bg-background font-sans">
-      <WIPBanner />
       <AppNavbar />
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
         {breadcrumbs && breadcrumbs.length > 0 && (

@@ -69,7 +69,6 @@ export default function AppFooter() {
                   rel="noopener noreferrer"
                   className="flex items-center text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  <HeartHandshake />
                   Support Us / Donate
                   <ExternalLink className="ml-1 h-3 w-3" />
                 </a>
@@ -81,7 +80,6 @@ export default function AppFooter() {
                   rel="noopener noreferrer"
                   className="flex items-center text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  <Github />
                   GitHub
                   <ExternalLink className="ml-1 h-3 w-3" />
                 </a>
