@@ -8,7 +8,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Code block styling */
 .prose pre {
   padding: 0;
   background: transparent;
@@ -39,7 +38,6 @@
   color: #e6edf3;
 }
 
-/* Inline code styling - ensure backticks are not visible */
 .prose code.inline-code {
   background-color: rgba(175, 184, 193, 0.2);
   padding: 0.125rem 0.375rem;
@@ -49,7 +47,6 @@
   font-weight: 400;
 }
 
-/* Hide any potential backtick artifacts */
 .prose code.inline-code::before,
 .prose code.inline-code::after {
   content: none !important;
@@ -60,7 +57,6 @@
   color: #f0f6fc;
 }
 
-/* Override default prose inline code styling */
 .prose code:not(.hljs):not(.inline-code) {
   background-color: rgba(175, 184, 193, 0.2);
   padding: 0.125rem 0.375rem;
@@ -75,14 +71,10 @@
   color: #f0f6fc;
 }
 
-/* Ensure proper spacing around code blocks */
 .prose pre:not(.hljs-code-block) code.hljs {
   border-radius: 0.5rem;
   padding: 1rem 1.25rem;
 }
-}
-
-/* Markdown heading anchor links styling */
 .prose .heading-container {
   position: relative;
 }
@@ -91,7 +83,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  scroll-margin-top: 5rem; /* Account for fixed headers */
+  scroll-margin-top: 5rem;
 }
 
 .prose .heading-anchor {
@@ -127,7 +119,6 @@
   outline-offset: 2px;
 }
 
-/* Ensure heading links work well with prose styles */
 .prose .heading-container h1,
 .prose .heading-container h2,
 .prose .heading-container h3,
