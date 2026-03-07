@@ -40,6 +40,7 @@ interface Mod {
   name: string;
   slug: string;
   description: string;
+  icon_url?: string;
   visibility: 'public' | 'private' | 'unlisted';
   owner: User;
 }
@@ -108,6 +109,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
     <PublicLayout
       modName={mod.name}
       modSlug={mod.slug}
+      modIconUrl={mod.icon_url}
       breadcrumbs={breadcrumbs}
     >
       <Head title={`${page.title} - ${mod.name} Documentation`} />
@@ -185,45 +187,49 @@ export default function PublicPage({ mod, page, navigation }: Props) {
             </CardContent>
 
             {/* Navigation Footer */}
-            <div className="border-t px-6 py-4">
-              <div className="flex items-center justify-between">
-                {prevPage ? (
-                  <Button variant="outline" asChild>
-                    <a
-                      href={`/mod/${mod.slug}/${prevPage.slug}`}
-                      className="flex items-center"
-                    >
-                      <ChevronLeftIcon className="mr-2 h-4 w-4" />
-                      <div className="text-left">
-                        <div className="text-xs text-muted-foreground">
-                          Previous
+            <div className="border-t bg-muted/20 px-6 py-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="flex justify-start">
+                  {prevPage && (
+                    <Button variant="outline" size="lg" asChild className="group h-auto p-4 transition-all hover:shadow-md">
+                      <a
+                        href={`/mod/${mod.slug}/${prevPage.slug}`}
+                        className="flex items-center space-x-3"
+                      >
+                        <ChevronLeftIcon className="h-5 w-5 shrink-0 text-muted-foreground group-hover:text-foreground" />
+                        <div className="text-left">
+                          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            Previous
+                          </div>
+                          <div className="font-semibold text-foreground group-hover:text-primary line-clamp-2">
+                            {prevPage.title}
+                          </div>
                         </div>
-                        <div className="font-medium">{prevPage.title}</div>
-                      </div>
-                    </a>
-                  </Button>
-                ) : (
-                  <div />
-                )}
+                      </a>
+                    </Button>
+                  )}
+                </div>
 
-                {nextPage ? (
-                  <Button variant="outline" asChild>
-                    <a
-                      href={`/mod/${mod.slug}/${nextPage.slug}`}
-                      className="flex items-center"
-                    >
-                      <div className="text-right">
-                        <div className="text-xs text-muted-foreground">
-                          Next
+                <div className="flex justify-end">
+                  {nextPage && (
+                    <Button variant="outline" size="lg" asChild className="group h-auto p-4 transition-all hover:shadow-md">
+                      <a
+                        href={`/mod/${mod.slug}/${nextPage.slug}`}
+                        className="flex items-center space-x-3"
+                      >
+                        <div className="text-right">
+                          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            Next
+                          </div>
+                          <div className="font-semibold text-foreground group-hover:text-primary line-clamp-2">
+                            {nextPage.title}
+                          </div>
                         </div>
-                        <div className="font-medium">{nextPage.title}</div>
-                      </div>
-                      <ChevronRightIcon className="ml-2 h-4 w-4" />
-                    </a>
-                  </Button>
-                ) : (
-                  <div />
-                )}
+                        <ChevronRightIcon className="h-5 w-5 shrink-0 text-muted-foreground group-hover:text-foreground" />
+                      </a>
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           </Card>

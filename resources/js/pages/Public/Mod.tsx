@@ -76,7 +76,7 @@ export default function PublicMod({ mod }: Props) {
   };
 
   return (
-    <PublicLayout modName={mod.name} modSlug={mod.slug}>
+    <PublicLayout modName={mod.name} modSlug={mod.slug} modIconUrl={mod.icon_url}>
       <Head title={`${mod.name} Documentation`} />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
