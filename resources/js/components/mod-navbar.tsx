@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Menu, Settings, Github, ExternalLink, BookOpenIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/sheet';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn } from '@/lib/utils';
+import type { SharedData } from '@/types';
 import { UserMenuContent } from './user-menu-content';
 
 interface ModNavbarProps {
@@ -46,6 +47,7 @@ function ModIcon({ size = 'h-8 w-8', modName, modIconUrl }: ModIconProps) {
 export default function ModNavbar({ modName, modSlug, modIconUrl }: ModNavbarProps) {
   const { isCurrentUrl } = useCurrentUrl();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { auth } = usePage<SharedData>().props;
 
   const navItems = [
     {
@@ -93,7 +95,7 @@ export default function ModNavbar({ modName, modSlug, modIconUrl }: ModNavbarPro
         </div>
 
         <div className="ml-8 flex items-center space-x-4">
-          <UserMenuContent />
+          {auth.user && <UserMenuContent />}
 
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
@@ -132,40 +134,42 @@ export default function ModNavbar({ modName, modSlug, modIconUrl }: ModNavbarPro
                   ))}
                 </div>
 
-                <div className="border-t pt-6">
-                  <div className="flex flex-col space-y-2">
-                    <Button
-                      asChild
-                      variant="ghost"
-                      size="sm"
-                      className="justify-start"
-                    >
-                      <Link
-                        href="/settings/profile"
-                        onClick={() => setIsMobileMenuOpen(false)}
+                {auth.user && (
+                  <div className="border-t pt-6">
+                    <div className="flex flex-col space-y-2">
+                      <Button
+                        asChild
+                        variant="ghost"
+                        size="sm"
+                        className="justify-start"
                       >
-                        <Settings className="mr-2 h-4 w-4" />
-                        Settings
-                      </Link>
-                    </Button>
-                    <Button
-                      asChild
-                      variant="ghost"
-                      size="sm"
-                      className="justify-start"
-                    >
-                      <a
-                        href="https://github.com/HytaleModding"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        <Link
+                          href="/settings/profile"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <Settings className="mr-2 h-4 w-4" />
+                          Settings
+                        </Link>
+                      </Button>
+                      <Button
+                        asChild
+                        variant="ghost"
+                        size="sm"
+                        className="justify-start"
                       >
-                        <Github className="mr-2 h-4 w-4" />
-                        GitHub
-                        <ExternalLink className="ml-auto h-3 w-3" />
-                      </a>
-                    </Button>
+                        <a
+                          href="https://github.com/HytaleModding"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Github className="mr-2 h-4 w-4" />
+                          GitHub
+                          <ExternalLink className="ml-auto h-3 w-3" />
+                        </a>
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </SheetContent>
           </Sheet>
