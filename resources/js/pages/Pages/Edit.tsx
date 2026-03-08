@@ -1,5 +1,6 @@
 import { Head, useForm, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { ChevronRightIcon } from 'lucide-react';
+import { useState, useMemo, useCallback } from 'react';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +16,10 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
+
+// ============================================================================
+// Type Definitions
+// ============================================================================
 
 interface Mod {
   id: string;
@@ -44,7 +49,19 @@ interface Props {
   potentialParents: PotentialParent[];
 }
 
+const MIN_EDITOR_LINES = 30;
+const EDITOR_MIN_HEIGHT = 'calc(100vh - 280px)';
+
+// Reusable Tailwind class patterns
+const CARD_CLASSES =
+  'border-border/40 bg-card/50 overflow-hidden flex flex-col';
+const CARD_HEADER_CLASSES =
+  'border-b border-border/40 bg-muted/30 px-4 py-3 flex-shrink-0';
+const CARD_TITLE_CLASSES = 'text-sm font-semibold text-muted-foreground';
+const TOGGLE_BUTTON_CLASSES = 'h-7 text-xs';
+
 export default function EditPage({ mod, page, potentialParents }: Props) {
+  // Form state management
   const { data, setData, patch, processing, errors } = useForm({
     title: page.title,
     content: page.content,
@@ -53,49 +70,84 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
     published: page.published,
   });
 
+  // View state management
   const [showPreview, setShowPreview] = useState(false);
+  const [showEditor, setShowEditor] = useState(true);
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    patch(`/dashboard/mods/${mod.slug}/pages/${page.slug}`);
-  };
+  // Memoized values
+  const lineCount = useMemo(
+    () => Math.max(data.content.split('\n').length, MIN_EDITOR_LINES),
+    [data.content],
+  );
+
+  const isInSplitView = showEditor && showPreview;
+  const pageUrl = `/dashboard/mods/${mod.slug}/pages/${page.slug}`;
+  const modUrl = `/dashboard/mods/${mod.slug}`;
+
+  const handleSubmit = useCallback(
+    (e: React.SubmitEvent) => {
+      e.preventDefault();
+      patch(pageUrl);
+    },
+    [patch, pageUrl],
+  );
+
+  const handleDelete = useCallback(() => {
+    if (
+      confirm(
+        'Are you sure you want to delete this page? This action cannot be undone.',
+      )
+    ) {
+      router.delete(pageUrl);
+    }
+  }, [pageUrl]);
+
+  const handleSaveAsDraft = useCallback(() => {
+    router.patch(pageUrl, { ...data, published: false });
+  }, [pageUrl, data]);
+
+  const togglePreview = () => setShowPreview((prev) => !prev);
+  const toggleEditor = () => setShowEditor((prev) => !prev);
 
   return (
     <AppLayout>
       <Head title={`Edit ${page.title} - ${mod.name}`} />
 
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <nav className="mb-4 text-sm text-gray-600">
-            <a
-              href={`/dashboard/mods/${mod.slug}`}
-              className="hover:text-gray-800"
-            >
+      <div className="mx-auto max-w-full px-4 py-6 sm:px-6 lg:px-8">
+        {/* ========== Page Header ========== */}
+        <header className="mb-8">
+          {/* Breadcrumb Navigation */}
+          <nav className="mb-4 flex items-center text-sm text-primary">
+            <a href={modUrl} className="hover:underline">
               {mod.name}
             </a>
-            <span className="mx-2">›</span>
-            <a
-              href={`/dashboard/mods/${mod.slug}/pages/${page.slug}`}
-              className="hover:text-gray-800"
-            >
+            <ChevronRightIcon className="mx-2 h-4 w-4" />
+            <a href={pageUrl} className="hover:underline">
               {page.title}
             </a>
-            <span className="mx-2">›</span>
+            <ChevronRightIcon className="mx-2 h-4 w-4" />
             <span>Edit</span>
           </nav>
-          <h1 className="text-3xl font-bold text-gray-900">Edit Page</h1>
-          <p className="mt-2 text-gray-600">
+
+          <h1 className="text-3xl font-bold text-primary">Edit Page</h1>
+          <p className="mt-2 text-muted-foreground">
             Update your documentation page content and settings
           </p>
-        </div>
+        </header>
 
-        <form onSubmit={submit} className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Page Details</CardTitle>
+        {/* ========== Edit Form ========== */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* ========== Page Details Card ========== */}
+          <Card className="border-border/40 bg-card/50">
+            <CardHeader className="border-b border-border/40 bg-muted/20 px-6 py-4">
+              <CardTitle className="text-base font-semibold">
+                Page Details
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <CardContent className="space-y-6 px-6 py-5">
+              {/* Title and Parent Fields */}
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Title Input */}
                 <div>
                   <Label htmlFor="title">Page Title *</Label>
                   <Input
@@ -104,13 +156,16 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
                     value={data.title}
                     onChange={(e) => setData('title', e.target.value)}
                     placeholder="Getting Started"
-                    className={errors.title ? 'border-red-500' : ''}
+                    className={errors.title ? 'border-destructive' : ''}
                   />
                   {errors.title && (
-                    <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+                    <p className="mt-1 text-sm text-destructive">
+                      {errors.title}
+                    </p>
                   )}
                 </div>
 
+                {/* Parent Page Select */}
                 <div>
                   <Label htmlFor="parent_id">Parent Page</Label>
                   <Select
@@ -136,6 +191,7 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
                 </div>
               </div>
 
+              {/* Page Options Checkboxes */}
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -166,30 +222,68 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* Editor */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Content Editor</CardTitle>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowPreview(!showPreview)}
-                  >
-                    {showPreview ? 'Hide Preview' : 'Show Preview'}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div>
-                  <Label htmlFor="content">Page Content (Markdown)</Label>
-                  <Textarea
-                    id="content"
-                    value={data.content}
-                    onChange={(e) => setData('content', e.target.value)}
-                    placeholder="# Welcome
+          {/* Content Editor & Preview Section */}
+          <div
+            className={`grid gap-4 ${isInSplitView ? 'lg:grid-cols-2' : 'grid-cols-1'}`}
+          >
+            {/* Markdown Editor */}
+            {showEditor && (
+              <Card
+                className={CARD_CLASSES}
+                style={{ minHeight: EDITOR_MIN_HEIGHT }}
+              >
+                <CardHeader className={CARD_HEADER_CLASSES}>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className={CARD_TITLE_CLASSES}>
+                      Content Editor
+                    </CardTitle>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setShowEditor(false);
+                          setShowPreview(true);
+                        }}
+                        className={TOGGLE_BUTTON_CLASSES}
+                      >
+                        Hide Editor
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={togglePreview}
+                        className={TOGGLE_BUTTON_CLASSES}
+                      >
+                        {showPreview ? 'Hide Preview' : 'Show Preview'}
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="flex flex-1 flex-col overflow-hidden p-0">
+                  {/* Editor with Line Numbers */}
+                  <div className="relative flex flex-1 overflow-hidden">
+                    {/* Line Numbers Gutter */}
+                    <div className="w-12 shrink-0 overflow-y-auto border-r border-border/40 bg-muted/30">
+                      <div className="flex flex-col items-center pt-3 font-mono text-xs text-muted-foreground select-none">
+                        {Array.from({ length: lineCount }, (_, i) => (
+                          <div key={i + 1} className="h-6 leading-6">
+                            {i + 1}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Markdown Textarea */}
+                    <Textarea
+                      id="content"
+                      value={data.content}
+                      rows={lineCount}
+                      onChange={(e) => setData('content', e.target.value)}
+                      placeholder="# Welcome
 
 Write your content here using Markdown syntax.
 
@@ -202,30 +296,58 @@ Write your content here using Markdown syntax.
 # Example code block
 echo 'Hello World'
 ```"
-                    rows={20}
-                    className={`font-mono text-sm ${errors.content ? 'border-red-500' : ''}`}
-                  />
-                  {errors.content && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {errors.content}
-                    </p>
-                  )}
-                  <p className="mt-2 text-sm text-gray-600">
-                    Use Markdown syntax to format your content. Supports
-                    headers, lists, code blocks, links, and more.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+                      className={`flex-1 resize-none overflow-y-auto rounded-none border-0 bg-background/50 px-4 py-3 font-mono text-sm leading-6 focus-visible:ring-0 focus-visible:ring-offset-0 ${errors.content ? 'min-h-screen border-l-2 border-l-destructive' : ''} `}
+                    />
+                  </div>
 
-            {/* Preview */}
+                  {/* Editor Footer */}
+                  <div className="flex shrink-0 items-center justify-between border-t border-border/40 bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-4">
+                      {errors.content ? (
+                        <span className="font-medium text-destructive">
+                          {errors.content}
+                        </span>
+                      ) : (
+                        <span>Markdown • {data.content.length} characters</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span>UTF-8</span>
+                      <span>•</span>
+                      <span>Ln {lineCount}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Live Preview */}
             {showPreview && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Live Preview</CardTitle>
+              <Card
+                className={CARD_CLASSES}
+                style={{ minHeight: EDITOR_MIN_HEIGHT }}
+              >
+                <CardHeader className={CARD_HEADER_CLASSES}>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className={CARD_TITLE_CLASSES}>
+                      Live Preview
+                    </CardTitle>
+                    {!showEditor && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={toggleEditor}
+                        className={TOGGLE_BUTTON_CLASSES}
+                      >
+                        Show Editor
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="min-h-100 rounded-md border p-4">
+
+                <CardContent className="flex-1 overflow-hidden p-0">
+                  <div className="h-full overflow-y-auto bg-background/50 p-6">
                     <MarkdownRenderer
                       content={data.content || 'Nothing to preview yet...'}
                     />
@@ -235,44 +357,28 @@ echo 'Hello World'
             )}
           </div>
 
+          {/* Form Actions */}
           <div className="flex items-center justify-between pt-4">
+            {/* Destructive Actions */}
             <div className="flex space-x-3">
               <Button type="button" variant="outline" asChild>
-                <a href={`/dashboard/mods/${mod.slug}/pages/${page.slug}`}>
-                  Cancel
-                </a>
+                <a href={pageUrl}>Cancel</a>
               </Button>
               <Button
                 type="button"
                 variant="destructive"
-                onClick={() => {
-                  if (
-                    confirm(
-                      'Are you sure you want to delete this page? This action cannot be undone.',
-                    )
-                  ) {
-                    router.delete(
-                      `/dashboard/mods/${mod.slug}/pages/${page.slug}`,
-                    );
-                  }
-                }}
+                onClick={handleDelete}
               >
                 Delete Page
               </Button>
             </div>
+
+            {/* Save Actions */}
             <div className="flex space-x-3">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => {
-                  router.patch(
-                    `/dashboard/mods/${mod.slug}/pages/${page.slug}`,
-                    {
-                      ...data,
-                      published: false,
-                    },
-                  );
-                }}
+                onClick={handleSaveAsDraft}
                 disabled={processing}
               >
                 {processing ? 'Saving...' : 'Save as Draft'}

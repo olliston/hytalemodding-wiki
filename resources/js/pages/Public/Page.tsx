@@ -191,17 +191,22 @@ export default function PublicPage({ mod, page, navigation }: Props) {
               <div className="grid grid-cols-2 gap-6">
                 <div className="flex justify-start">
                   {prevPage && (
-                    <Button variant="outline" size="lg" asChild className="group h-auto p-4 transition-all hover:shadow-md">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      asChild
+                      className="group h-auto p-4 transition-all hover:shadow-md"
+                    >
                       <a
                         href={`/mod/${mod.slug}/${prevPage.slug}`}
                         className="flex items-center space-x-3"
                       >
                         <ChevronLeftIcon className="h-5 w-5 shrink-0 text-muted-foreground group-hover:text-foreground" />
                         <div className="text-left">
-                          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          <div className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                             Previous
                           </div>
-                          <div className="font-semibold text-foreground group-hover:text-primary line-clamp-2">
+                          <div className="line-clamp-2 font-semibold text-foreground group-hover:text-primary">
                             {prevPage.title}
                           </div>
                         </div>
@@ -212,16 +217,21 @@ export default function PublicPage({ mod, page, navigation }: Props) {
 
                 <div className="flex justify-end">
                   {nextPage && (
-                    <Button variant="outline" size="lg" asChild className="group h-auto p-4 transition-all hover:shadow-md">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      asChild
+                      className="group h-auto p-4 transition-all hover:shadow-md"
+                    >
                       <a
                         href={`/mod/${mod.slug}/${nextPage.slug}`}
                         className="flex items-center space-x-3"
                       >
                         <div className="text-right">
-                          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          <div className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                             Next
                           </div>
-                          <div className="font-semibold text-foreground group-hover:text-primary line-clamp-2">
+                          <div className="line-clamp-2 font-semibold text-foreground group-hover:text-primary">
                             {nextPage.title}
                           </div>
                         </div>

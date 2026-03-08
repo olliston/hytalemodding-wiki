@@ -51,9 +51,15 @@ class PageController extends Controller
         $parentId = $request->get('parent_id');
         $parent = $parentId ? Page::findOrFail($parentId) : null;
 
+        $potentialParents = $mod->pages()
+            ->where('id', '!=', $parent?->id)
+            ->orderBy('title')
+            ->get();
+
         return Inertia::render('Pages/Create', [
             'mod' => $mod,
             'parent' => $parent,
+            'potentialParents' => $potentialParents,
         ]);
     }
 
@@ -135,9 +141,8 @@ class PageController extends Controller
 
         $navigation = $mod->pages()
             ->whereNull('parent_id')
-            ->where('published', true)
             ->with(['children' => function ($query) {
-                $query->where('published', true)->orderBy('order_index');
+                $query->orderBy('order_index');
             }])
             ->orderBy('order_index')
             ->get()
@@ -146,11 +151,13 @@ class PageController extends Controller
                     'id' => $navPage->id,
                     'title' => $navPage->title,
                     'slug' => $navPage->slug,
+                    'published' => $navPage->published,
                     'children' => $navPage->children->map(function ($child) {
                         return [
                             'id' => $child->id,
                             'title' => $child->title,
                             'slug' => $child->slug,
+                            'published' => $child->published,
                         ];
                     })->toArray(),
                 ];

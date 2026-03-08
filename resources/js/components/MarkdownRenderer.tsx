@@ -12,22 +12,18 @@ interface MarkdownRendererProps {
 
 const renderer = new marked.Renderer();
 
-renderer.code = function({ text, lang }: { text: string; lang?: string }) {
+renderer.code = function ({ text, lang }: { text: string; lang?: string }) {
   const language = lang && hljs.getLanguage(lang) ? lang : 'plaintext';
   const highlighted = hljs.highlight(text, { language }).value;
 
   return `<pre class="hljs-code-block"><code class="hljs language-${language}">${highlighted}</code></pre>`;
 };
 
-renderer.codespan = function({ text }: { text: string }) {
+renderer.codespan = function ({ text }: { text: string }) {
   return `<code class="inline-code">${text}</code>`;
 };
 
-marked.use(
-  gfmHeadingId(),
-  markedFootnote(),
-  { renderer }
-);
+marked.use(gfmHeadingId(), markedFootnote(), { renderer });
 
 marked.setOptions({
   gfm: true,

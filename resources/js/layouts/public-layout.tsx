@@ -33,7 +33,11 @@ export default function PublicLayout({
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {modName && modSlug ? (
-        <ModNavbar modName={modName} modSlug={modSlug} modIconUrl={modIconUrl} />
+        <ModNavbar
+          modName={modName}
+          modSlug={modSlug}
+          modIconUrl={modIconUrl}
+        />
       ) : (
         <AppNavbar />
       )}
