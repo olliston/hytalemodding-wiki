@@ -75,7 +75,7 @@ export default function ModNavbar({
             className="flex items-center space-x-3 transition-opacity hover:opacity-80"
           >
             <ModIcon size="h-8 w-8" modName={modName} modIconUrl={modIconUrl} />
-            <span className="bg-clip-text text-xl font-semibold text-black dark:text-white">
+            <span className="bg-clip-text text-xl font-semibold text-primary">
               {modName}
             </span>
           </Link>
@@ -123,7 +123,7 @@ export default function ModNavbar({
                       modName={modName}
                       modIconUrl={modIconUrl}
                     />
-                    <span className="bg-clip-text text-lg font-bold text-black dark:text-white">
+                    <span className="bg-clip-text text-lg font-bold text-primary">
                       {modName}
                     </span>
                   </div>
