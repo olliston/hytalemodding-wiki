@@ -1,10 +1,12 @@
 import { PencilIcon, EyeIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 import { Head } from '@inertiajs/react';
+import { ChevronRightIcon, HammerIcon, PlusIcon } from 'lucide-react';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
+import { formatDate } from '@/utils/commonUtils';
 import { getMarkdownPreview } from '@/utils/markdown';
 
 interface User {
@@ -42,6 +44,7 @@ interface NavigationPage {
   id: string;
   title: string;
   slug: string;
+  published: boolean;
   children?: NavigationPage[];
 }
 
@@ -54,36 +57,36 @@ interface Props {
 }
 
 export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
   const renderNavigation = (pages: NavigationPage[], level = 0) => {
-    return pages.map((navPage) => (
-      <div key={navPage.id} className={`ml-${level * 4}`}>
-        <a
-          href={`/dashboard/mods/${mod.slug}/pages/${navPage.slug}`}
-          className={`block rounded px-2 py-1 text-sm hover:bg-gray-100 ${
-            navPage.id === page.id
-              ? 'bg-blue-50 font-medium text-blue-700'
-              : 'text-gray-700'
-          }`}
-        >
-          {navPage.title}
-        </a>
-        {navPage.children && navPage.children.length > 0 && (
-          <div className="ml-4">
-            {renderNavigation(navPage.children, level + 1)}
+    return pages
+      .filter((navPage) => navPage.published || canEdit)
+      .map((navPage) => (
+        <div key={navPage.id} className={`ml-${level * 4}`}>
+          <div className="flex items-center gap-2">
+            <a
+              href={`/dashboard/mods/${mod.slug}/pages/${navPage.slug}`}
+              className={`block rounded px-2 py-1 text-sm ${
+                navPage.id === page.id
+                  ? 'font-medium text-primary underline'
+                  : 'text-muted-foreground hover:text-primary'
+              }`}
+            >
+              {navPage.title}
+            </a>
+            {navPage.published === false && (
+              <span className="flex items-center gap-0.5 bg-transparent text-xs text-yellow-400">
+                <HammerIcon className="mr-1 h-3 w-3" />
+                Draft
+              </span>
+            )}
           </div>
-        )}
-      </div>
-    ));
+          {navPage.children && navPage.children.length > 0 && (
+            <div className="ml-4">
+              {renderNavigation(navPage.children, level + 1)}
+            </div>
+          )}
+        </div>
+      ));
   };
 
   return (
@@ -94,7 +97,7 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
           {/* Sidebar Navigation */}
           <div className="lg:col-span-1">
-            <Card>
+            <Card className="border-none bg-transparent">
               <CardHeader>
                 <CardTitle className="text-lg">{mod.name}</CardTitle>
               </CardHeader>
@@ -102,9 +105,15 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
                 <nav className="space-y-1">{renderNavigation(navigation)}</nav>
 
                 {canEdit && (
-                  <div className="mt-6 border-t pt-4">
-                    <Button size="sm" className="w-full" asChild>
+                  <div className="border-t pt-4">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                      asChild
+                    >
                       <a href={`/dashboard/mods/${mod.slug}/pages/create`}>
+                        <PlusIcon className="h-4 w-4" />
                         Add New Page
                       </a>
                     </Button>
@@ -117,10 +126,10 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
           {/* Main Content */}
           <div className="lg:col-span-3">
             {/* Breadcrumbs */}
-            <nav className="mb-6 text-sm text-gray-600">
+            <nav className="mb-6 text-sm text-primary">
               <a
                 href={`/dashboard/mods/${mod.slug}`}
-                className="hover:text-gray-800"
+                className="hover:underline"
               >
                 {mod.name}
               </a>
@@ -128,15 +137,15 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
                 page.path.length > 0 &&
                 page.path.map((pathItem, index) => (
                   <span key={pathItem.id}>
-                    <span className="mx-2">›</span>
+                    <ChevronRightIcon className="m-1 inline h-4 w-4" />
                     {index === page.path.length - 1 ? (
-                      <span className="font-medium text-gray-900">
+                      <span className="font-medium text-primary">
                         {pathItem.title}
                       </span>
                     ) : (
                       <a
                         href={`/dashboard/mods/${mod.slug}/pages/${pathItem.slug}`}
-                        className="hover:text-gray-800"
+                        className="hover:underline"
                       >
                         {pathItem.title}
                       </a>
@@ -148,10 +157,10 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
             {/* Page Header */}
             <div className="mb-6 flex items-start justify-between">
               <div>
-                <h1 className="mb-2 text-3xl font-bold text-gray-900">
+                <h1 className="mb-2 text-3xl font-bold text-primary">
                   {page.title}
                 </h1>
-                <div className="flex items-center space-x-4 text-sm text-gray-600">
+                <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                   <span>By {page.creator.name}</span>
                   <span>•</span>
                   <span>Updated {formatDate(page.updated_at)}</span>
@@ -160,7 +169,7 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
                       <span>•</span>
                       <Badge
                         variant="outline"
-                        className="bg-yellow-50 text-yellow-700"
+                        className="border border-yellow-400 bg-transparent font-bold text-yellow-400"
                       >
                         Draft
                       </Badge>
@@ -170,7 +179,7 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
               </div>
 
               <div className="flex space-x-3">
-                {mod.visibility === 'public' && (
+                {mod.visibility === 'public' && page.published && (
                   <Button variant="outline" size="sm" asChild>
                     <a href={`/mod/${mod.slug}/${page.slug}`} target="_blank">
                       <EyeIcon className="mr-2 h-4 w-4" />
@@ -215,12 +224,12 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
                       <a
                         key={child.id}
                         href={`/dashboard/mods/${mod.slug}/pages/${child.slug}`}
-                        className="block rounded-lg border p-4 transition-shadow hover:shadow-md"
+                        className="block rounded-lg border p-4 transition-shadow hover:bg-muted-foreground/5 hover:shadow-md"
                       >
-                        <h3 className="mb-1 font-medium text-gray-900">
+                        <h3 className="mb-1 font-medium text-primary">
                           {child.title}
                         </h3>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-muted-foreground">
                           {getMarkdownPreview(child.content || '', 150)}
                         </p>
                       </a>
@@ -231,19 +240,21 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
             )}
 
             {/* Page Footer */}
-            <div className="mt-8 border-t pt-6 text-sm text-gray-600">
-              <div className="flex items-center justify-between">
+            <div className="mt-8 border-t pt-6 text-sm">
+              <div className="flex items-center justify-between text-muted-foreground">
                 <div>
                   Last updated by {page.updater?.name || page.creator.name}
                   on {formatDate(page.updated_at)}
                 </div>
                 {canEdit && (
-                  <a
-                    href={`/dashboard/mods/${mod.slug}/pages/${page.slug}/edit`}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    Improve this page
-                  </a>
+                  <Button size="sm" variant="outline" asChild>
+                    <a
+                      href={`/dashboard/mods/${mod.slug}/pages/${page.slug}/edit`}
+                    >
+                      <PencilIcon className="mr-2 h-4 w-4" />
+                      Improve this Page
+                    </a>
+                  </Button>
                 )}
               </div>
             </div>

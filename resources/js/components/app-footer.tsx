@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Github, ExternalLink, HeartHandshake } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import HytaleModdingLogo from './hytale-modding-logo';
 
 export default function AppFooter() {

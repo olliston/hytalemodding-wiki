@@ -1,10 +1,19 @@
 import { Head, useForm } from '@inertiajs/react';
+import { ChevronRightIcon } from 'lucide-react';
+import { useMemo, useCallback } from 'react';
+import MarkdownEditorPreview from '@/components/markdown-editor-preview';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 
 interface Mod {
@@ -22,9 +31,18 @@ interface Page {
 interface Props {
   mod: Mod;
   parent?: Page;
+  potentialParents?: Page[];
 }
 
-export default function CreatePage({ mod, parent }: Props) {
+// Constants
+const MIN_EDITOR_LINES = 30;
+
+export default function CreatePage({
+  mod,
+  parent,
+  potentialParents = [],
+}: Props) {
+  // Form state management
   const { data, setData, post, processing, errors } = useForm({
     title: '',
     content: '',
@@ -33,60 +51,112 @@ export default function CreatePage({ mod, parent }: Props) {
     published: true,
   });
 
-  const submit = (e: React.SubmitEvent) => {
-    e.preventDefault();
+  // Memoized values
+  const lineCount = useMemo(
+    () => Math.max(data.content.split('\n').length, MIN_EDITOR_LINES),
+    [data.content],
+  );
+
+  const modUrl = `/dashboard/mods/${mod.slug}`;
+
+  const handleSubmit = useCallback(
+    (e: React.SubmitEvent) => {
+      e.preventDefault();
+      post(`/dashboard/mods/${mod.slug}/pages`);
+    },
+    [post, mod.slug],
+  );
+
+  const handleSaveAsDraft = useCallback(() => {
+    setData('published', false);
     post(`/dashboard/mods/${mod.slug}/pages`);
-  };
+  }, [post, mod.slug, setData]);
 
   return (
     <AppLayout>
       <Head title={`Create Page - ${mod.name}`} />
 
-      <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <nav className="mb-4 text-sm text-gray-600">
-            <a
-              href={`/dashboard/mods/${mod.slug}`}
-              className="hover:text-gray-800"
-            >
+      <div className="mx-auto max-w-full px-4 py-6 sm:px-6 lg:px-8">
+        {/*  Page Header  */}
+        <header className="mb-8">
+          {/* Breadcrumb Navigation */}
+          <nav className="mb-4 flex items-center text-sm text-primary">
+            <a href={modUrl} className="hover:underline">
               {mod.name}
             </a>
             {parent && (
               <>
-                <span className="mx-2">›</span>
+                <ChevronRightIcon className="mx-2 h-4 w-4" />
                 <span>{parent.title}</span>
               </>
             )}
-            <span className="mx-2">›</span>
+            <ChevronRightIcon className="mx-2 h-4 w-4" />
             <span>New Page</span>
           </nav>
-          <h1 className="text-3xl font-bold text-gray-900">Create New Page</h1>
-          <p className="mt-2 text-gray-600">
+
+          <h1 className="text-3xl font-bold text-primary">Create New Page</h1>
+          <p className="mt-2 text-muted-foreground">
             Add a new documentation page to your mod
           </p>
-        </div>
+        </header>
 
-        <form onSubmit={submit} className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Page Details</CardTitle>
+        {/*  Create Form  */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/*  Page Details Card  */}
+          <Card className="border-border/40 bg-card/50">
+            <CardHeader className="border-b border-border/40 bg-muted/20 px-6 py-4">
+              <CardTitle className="text-base font-semibold">
+                Page Details
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <Label htmlFor="title">Page Title *</Label>
-                <Input
-                  id="title"
-                  type="text"
-                  value={data.title}
-                  onChange={(e) => setData('title', e.target.value)}
-                  placeholder="Getting Started"
-                  className={errors.title ? 'border-red-500' : ''}
-                />
-                {errors.title && (
-                  <p className="mt-1 text-sm text-red-600">{errors.title}</p>
-                )}
+            <CardContent className="space-y-6 px-6 py-5">
+              {/* Title and Parent Fields */}
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Title Input */}
+                <div>
+                  <Label htmlFor="title">Page Title *</Label>
+                  <Input
+                    id="title"
+                    type="text"
+                    value={data.title}
+                    onChange={(e) => setData('title', e.target.value)}
+                    placeholder="Getting Started"
+                    className={errors.title ? 'border-destructive' : ''}
+                  />
+                  {errors.title && (
+                    <p className="mt-1 text-sm text-destructive">
+                      {errors.title}
+                    </p>
+                  )}
+                </div>
+
+                {/* Parent Page Select */}
+                <div>
+                  <Label htmlFor="parent_id">Parent Page</Label>
+                  <Select
+                    value={data.parent_id || 'none'}
+                    onValueChange={(value) =>
+                      setData('parent_id', value === 'none' ? '' : value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="No parent (root page)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">
+                        No parent (root page)
+                      </SelectItem>
+                      {potentialParents.map((parent) => (
+                        <SelectItem key={parent.id} value={parent.id}>
+                          {parent.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
+              {/* Page Options Checkboxes */}
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -100,65 +170,45 @@ export default function CreatePage({ mod, parent }: Props) {
                     Index page (home page of the mod)
                   </Label>
                 </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="published"
+                    checked={data.published}
+                    onCheckedChange={(checked) =>
+                      setData('published', !!checked)
+                    }
+                  />
+                  <Label htmlFor="published" className="text-sm">
+                    Published
+                  </Label>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Content</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div>
-                <Label htmlFor="content">Page Content (Markdown)</Label>
-                <Textarea
-                  id="content"
-                  value={data.content}
-                  onChange={(e) => setData('content', e.target.value)}
-                  placeholder="# Welcome to my mod
+          {/* Content Editor & Preview Section */}
+          {/* Content Editor & Preview Section */}
+          <MarkdownEditorPreview
+            content={data.content}
+            onContentChange={(content) => setData('content', content)}
+            lineCount={lineCount}
+            error={errors.content}
+          />
 
-This is the main page of my mod documentation.
-
-## Features
-
-- Feature 1
-- Feature 2
-- Feature 3
-
-## Installation
-
-```bash
-# Install the mod
-./install.sh
-```
-
-For more information, see the other pages in this documentation."
-                  rows={20}
-                  className={`font-mono text-sm ${errors.content ? 'border-red-500' : ''}`}
-                />
-                {errors.content && (
-                  <p className="mt-1 text-sm text-red-600">{errors.content}</p>
-                )}
-                <p className="mt-2 text-sm text-gray-600">
-                  Use Markdown syntax to format your content. You can include
-                  code blocks, images, links, and more.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
+          {/*  Form Actions  */}
           <div className="flex items-center justify-between pt-4">
+            {/* Cancel Action */}
             <Button type="button" variant="outline" asChild>
-              <a href={`/dashboard/mods/${mod.slug}`}>Cancel</a>
+              <a href={modUrl}>Cancel</a>
             </Button>
+
+            {/* Save Actions */}
             <div className="flex space-x-3">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => {
-                  setData('published', false);
-                  post(`/dashboard/mods/${mod.slug}/pages`);
-                }}
+                onClick={handleSaveAsDraft}
                 disabled={processing}
               >
                 {processing ? 'Saving...' : 'Save as Draft'}

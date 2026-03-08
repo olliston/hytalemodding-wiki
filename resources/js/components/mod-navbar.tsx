@@ -1,5 +1,11 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Menu, Settings, Github, ExternalLink, BookOpenIcon } from 'lucide-react';
+import {
+  Menu,
+  Settings,
+  Github,
+  ExternalLink,
+  BookOpenIcon,
+} from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -44,7 +50,11 @@ function ModIcon({ size = 'h-8 w-8', modName, modIconUrl }: ModIconProps) {
   return <BookOpenIcon className={cn(size, 'text-primary')} />;
 }
 
-export default function ModNavbar({ modName, modSlug, modIconUrl }: ModNavbarProps) {
+export default function ModNavbar({
+  modName,
+  modSlug,
+  modIconUrl,
+}: ModNavbarProps) {
   const { isCurrentUrl } = useCurrentUrl();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { auth } = usePage<SharedData>().props;
@@ -108,7 +118,11 @@ export default function ModNavbar({ modName, modSlug, modIconUrl }: ModNavbarPro
               <SheetHeader>
                 <SheetTitle className="text-left">
                   <div className="flex items-center space-x-3">
-                    <ModIcon size="h-8 w-8" modName={modName} modIconUrl={modIconUrl} />
+                    <ModIcon
+                      size="h-8 w-8"
+                      modName={modName}
+                      modIconUrl={modIconUrl}
+                    />
                     <span className="bg-clip-text text-lg font-bold text-black dark:text-white">
                       {modName}
                     </span>
