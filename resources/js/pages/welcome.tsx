@@ -20,14 +20,14 @@ export default function Welcome({
           rel="stylesheet"
         />
       </Head>
-      <div className="flex min-h-screen flex-col items-center justify-center bg-[#FDFDFC] p-6 text-[#1b1b18] dark:bg-[#0a0a0a]">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background text-primary">
         <div className="flex flex-col items-center space-y-8 text-center">
           <div className="flex flex-col items-center space-y-4">
             <HytaleModdingLogo variant="banner" size="lg" />
-            <h1 className="text-4xl font-bold text-[#1b1b18] dark:text-[#EDEDEC]">
+            <h1 className="text-4xl font-bold">
               Welcome to HytaleModding Wiki
             </h1>
-            <p className="max-w-md text-xl text-[#706f6c] dark:text-[#A1A09A]">
+            <p className="max-w-md text-xl text-muted-foreground">
               This page is under development
             </p>
           </div>

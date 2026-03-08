@@ -256,7 +256,7 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
                               src={mod.owner.avatar_url}
                               alt={mod.owner.name}
                             />
-                            <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                            <AvatarFallback className="text-primarys rounded-lg bg-background">
                               {mod.owner.name.charAt(0).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
@@ -284,7 +284,7 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
                                 src={collaborator.avatar_url}
                                 alt={collaborator.name}
                               />
-                              <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                              <AvatarFallback className="rounded-lg bg-background text-primary">
                                 {collaborator.name.charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>

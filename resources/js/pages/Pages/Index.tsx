@@ -143,7 +143,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
           {...provided.draggableProps}
           className={`group border-b transition-all hover:bg-muted/50 ${
             snapshot.isDragging ? 'bg-accent shadow-lg' : ''
-          } ${isDragModeEnabled && canEdit ? 'hover:bg-orange-50 dark:hover:bg-orange-900/20' : ''}`}
+          } ${isDragModeEnabled && canEdit ? 'hover:bg-accent' : ''}`}
         >
           {/* Hierarchy + Title Column */}
           <td className="w-1/2 py-2 pr-4">
@@ -381,15 +381,15 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
         </div>
 
         {isDragModeEnabled && canEdit && (
-          <div className="mb-6 rounded-lg border border-orange-200 bg-orange-50 p-4 dark:border-orange-800 dark:bg-orange-900/20">
+          <div className="mb-6 rounded-lg border border-accent bg-accent p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <ArrowsUpDownIcon className="mr-2 h-5 w-5 text-orange-600 dark:text-orange-400" />
+                <ArrowsUpDownIcon className="mr-2 h-5 w-5 text-accent-foreground" />
                 <div>
-                  <p className="text-sm font-medium text-orange-800 dark:text-orange-300">
+                  <p className="text-sm font-medium text-accent-foreground">
                     Reorder Mode Active
                   </p>
-                  <p className="text-xs text-orange-600 dark:text-orange-400">
+                  <p className="text-xs text-accent-foreground">
                     Drag the handle icons to reorder pages
                   </p>
                 </div>
@@ -398,7 +398,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
                 size="sm"
                 variant="outline"
                 onClick={() => setIsDragModeEnabled(false)}
-                className="border-orange-300 text-orange-700 hover:bg-orange-100 dark:border-orange-700 dark:text-orange-300 dark:hover:bg-orange-900/30"
+                className="border-accent text-accent-foreground hover:bg-accent/10"
               >
                 Exit
               </Button>

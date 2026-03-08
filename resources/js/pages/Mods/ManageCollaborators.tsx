@@ -454,7 +454,7 @@ export default function ManageCollaborators({
                               src={collaborator.avatar_url}
                               alt={collaborator.name}
                             />
-                            <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                            <AvatarFallback className="rounded-lg bg-background text-primary">
                               {getInitials(collaborator.name)}
                             </AvatarFallback>
                           </Avatar>
