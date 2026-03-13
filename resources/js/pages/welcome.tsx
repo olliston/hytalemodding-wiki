@@ -22,6 +22,7 @@ import { UserMenuContent } from '@/components/user-menu-content';
 import { dashboard, home, login, register } from '@/routes';
 import mods from '@/routes/mods';
 import type { SharedData } from '@/types';
+import AppFooter from '@/components/app-footer';
 
 const featureCards: Array<{
   title: string;
@@ -227,6 +228,7 @@ export default function Welcome({
           </section>
         </div>
       </div>
+    <AppFooter />
     </>
   );
 }
