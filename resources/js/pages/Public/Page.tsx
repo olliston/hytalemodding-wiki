@@ -174,13 +174,11 @@ export default function PublicPage({ mod, page, navigation }: Props) {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="lg:col-span-3">
+        <div className="min-w-0 lg:col-span-3">
           <Card className="mb-8">
-            {/* Page Header */}
             <CardHeader className="border-b">
               <div className="space-y-2">
-                <CardTitle className="text-2xl">{page.title}</CardTitle>
+                <CardTitle className="break-words text-2xl">{page.title}</CardTitle>
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span>Last updated {formatDate(page.updated_at)}</span>
                   {!page.published && <Badge variant="outline">Draft</Badge>}
@@ -188,9 +186,8 @@ export default function PublicPage({ mod, page, navigation }: Props) {
               </div>
             </CardHeader>
 
-            {/* Page Content */}
             <CardContent className="p-8">
-              <div className="prose max-w-none prose-gray dark:prose-invert">
+              <div className="prose max-w-none min-w-0 break-words [overflow-wrap:anywhere] prose-code:break-words prose-pre:max-w-full prose-pre:overflow-x-auto prose-gray dark:prose-invert">
                 <MarkdownRenderer
                   content={
                     page.kind === 'category' && !page.content
@@ -201,7 +198,6 @@ export default function PublicPage({ mod, page, navigation }: Props) {
               </div>
             </CardContent>
 
-            {/* Navigation Footer */}
             <div className="border-t bg-muted/20 px-6 py-6">
               <div className="grid grid-cols-2 gap-6">
                 <div className="flex justify-start">
@@ -214,14 +210,14 @@ export default function PublicPage({ mod, page, navigation }: Props) {
                     >
                       <a
                         href={`/mod/${mod.slug}/${prevPage.slug}`}
-                        className="flex items-center space-x-3"
+                        className="flex min-w-0 items-center space-x-3"
                       >
                         <ChevronLeftIcon className="h-5 w-5 shrink-0 text-muted-foreground group-hover:text-foreground" />
-                        <div className="text-left">
+                        <div className="min-w-0 text-left">
                           <div className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                             Previous
                           </div>
-                          <div className="line-clamp-2 font-semibold text-foreground group-hover:text-primary">
+                          <div className="line-clamp-2 break-words font-semibold text-foreground group-hover:text-primary">
                             {prevPage.title}
                           </div>
                         </div>
@@ -240,13 +236,13 @@ export default function PublicPage({ mod, page, navigation }: Props) {
                     >
                       <a
                         href={`/mod/${mod.slug}/${nextPage.slug}`}
-                        className="flex items-center space-x-3"
+                        className="flex min-w-0 items-center space-x-3"
                       >
-                        <div className="text-right">
+                        <div className="min-w-0 text-right">
                           <div className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                             Next
                           </div>
-                          <div className="line-clamp-2 font-semibold text-foreground group-hover:text-primary">
+                          <div className="line-clamp-2 break-words font-semibold text-foreground group-hover:text-primary">
                             {nextPage.title}
                           </div>
                         </div>
@@ -259,7 +255,6 @@ export default function PublicPage({ mod, page, navigation }: Props) {
             </div>
           </Card>
 
-          {/* Child Pages */}
           {page.children && page.children.length > 0 && (
             <Card>
               <CardHeader>
@@ -279,10 +274,10 @@ export default function PublicPage({ mod, page, navigation }: Props) {
                             href={`/mod/${mod.slug}/${child.slug}`}
                             className="group block"
                           >
-                            <h4 className="mb-2 font-medium text-foreground group-hover:text-primary">
+                            <h4 className="mb-2 break-words font-medium text-foreground group-hover:text-primary">
                               {child.title}
                             </h4>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="break-words text-sm text-muted-foreground">
                               {getMarkdownPreview(child.content || '', 120)}
                             </p>
                           </a>
