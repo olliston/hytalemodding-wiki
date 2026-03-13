@@ -15,6 +15,14 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+Route::get('/privacy', function () {
+    return Inertia::render('Legal/Privacy');
+})->name('legal.privacy');
+
+Route::get('/terms', function () {
+    return Inertia::render('Legal/Terms');
+})->name('legal.terms');
+
 Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified']], function () {
 
     Route::get('/', function () {

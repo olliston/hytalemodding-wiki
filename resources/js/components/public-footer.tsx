@@ -13,13 +13,13 @@ export default function PublicFooter() {
                 href="/privacy"
                 className="transition-colors hover:text-foreground"
               >
-                Privacy
+                Privacy Policy
               </Link>
               <Link
                 href="/terms"
                 className="transition-colors hover:text-foreground"
               >
-                Terms
+                Terms of Service
               </Link>
             </div>
           </div>
