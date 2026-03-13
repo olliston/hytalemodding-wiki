@@ -1,12 +1,9 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
   ArrowRight,
-  BookOpen,
-  FolderKanban,
   Rocket,
   ShieldCheck,
   Sparkles,
-  Users,
   type LucideIcon,
 } from 'lucide-react';
 import AppFooter from '@/components/app-footer';
@@ -18,30 +15,6 @@ import mods from '@/routes/mods';
 import publicRoutes from '@/routes/public';
 import type { SharedData } from '@/types';
 
-const featureCards: Array<{
-  title: string;
-  description: string;
-  icon: LucideIcon;
-}> = [
-  {
-    title: 'Build clear documentation',
-    description:
-      'Create rich wiki pages for installation steps, APIs, guides, and changelogs.',
-    icon: BookOpen,
-  },
-  {
-    title: 'Organize by project',
-    description:
-      'Keep each mod in its own workspace with pages, collaborators, and visibility controls.',
-    icon: FolderKanban,
-  },
-  {
-    title: 'Collaborate with your team',
-    description:
-      'Invite contributors, review updates together, and keep docs current as your mod evolves.',
-    icon: Users,
-  },
-];
 
 const workflowSteps: Array<{
   title: string;
@@ -120,71 +93,48 @@ export default function Welcome({
         </div>
 
         <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-14 px-6 py-10 md:px-8 md:py-14">
-          <section className="grid items-start gap-8 pt-4 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10">
-            <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                <Sparkles className="h-3.5 w-3.5" />
-                Documentation that feels as polished as your mod
-              </div>
-
-              <div className="space-y-4">
-                <h1 className="max-w-4xl text-5xl font-semibold tracking-tight md:text-6xl">
-                  Your home for Hytale mod documentation
-                </h1>
-                <p className="max-w-2xl text-lg text-muted-foreground md:text-xl">
-                  Create mod wikis, ship clearer guides, and keep your whole
-                  team aligned in one focused workspace.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3">
-                {auth.user ? (
-                  <>
-                    <Button asChild size="lg">
-                      <Link href={dashboard()}>
-                        Go to Dashboard
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <Button asChild variant="outline" size="lg">
-                      <Link href={publicRoutes.mods()}>Browse Mods</Link>
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button asChild variant="outline" size="lg">
-                      <Link href={publicRoutes.mods()}>Browse Mods</Link>
-                    </Button>
-                  </>
-                )}
-              </div>
+          <section className="flex flex-col items-start gap-6 pt-4 md:max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              <Sparkles className="h-3.5 w-3.5" />
+              Documentation that feels as polished as your mod
             </div>
 
-            <div className="space-y-4 pt-1 lg:pt-2">
-              <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
-                What teams use most
+            <div className="space-y-4">
+              <h1 className="max-w-4xl text-5xl font-semibold tracking-tight md:text-6xl">
+                Your home for Hytale mod documentation
+              </h1>
+              <p className="max-w-2xl text-lg text-muted-foreground md:text-xl">
+                Create mod wikis, ship clearer guides, and keep your whole
+                team aligned in one focused workspace.
               </p>
-              <div className="h-px w-full bg-border/70" />
-              <div className="space-y-1">
-                {featureCards.map(({ title, description, icon: Icon }) => (
-                  <div
-                    key={title}
-                    className="border-b border-border/60 py-4 last:border-b-0"
-                  >
-                    <div className="mb-2 flex items-center gap-3">
-                      <div className="rounded-md bg-primary/10 p-2 text-primary">
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <h2 className="text-sm font-semibold md:text-base">
-                        {title}
-                      </h2>
-                    </div>
-                    <p className="pl-11 text-sm text-muted-foreground">
-                      {description}
-                    </p>
-                  </div>
-                ))}
-              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              {auth.user ? (
+                <>
+                  <Button asChild size="lg">
+                    <Link href={dashboard()}>
+                      Go to Dashboard
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" size="lg">
+                    <Link href={publicRoutes.mods()}>Browse Mods</Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button asChild size="lg">
+                    <Link href={login()}>
+                      Get Started
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" size="lg">
+                    <Link href={publicRoutes.mods()}>Browse Mods</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </section>
 
