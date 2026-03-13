@@ -48,11 +48,14 @@ class ModController extends ClientController
      */
     public function show(Request $request)
     {
-        $mod_id = $request->route('mod');
+        $modIdentifier = $request->route('mod');
 
-        $mod = Mod::where('id', $mod_id)
-            ->where('visibility', 'public')
+        $mod = Mod::where('visibility', 'public')
             ->where('external_access', true)
+            ->where(function ($query) use ($modIdentifier) {
+                $query->where('id', $modIdentifier)
+                    ->orWhere('slug', $modIdentifier);
+            })
             ->with('owner')
             ->firstOrFail();
 
