@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { dashboard, home, login, register } from '@/routes';
 import mods from '@/routes/mods';
+import publicRoutes from '@/routes/public';
 import type { SharedData } from '@/types';
 
 const featureCards: Array<{
@@ -146,7 +147,7 @@ export default function Welcome({
                       </Link>
                     </Button>
                     <Button asChild variant="outline" size="lg">
-                      <Link href={mods.index()}>Browse Mods</Link>
+                      <Link href={publicRoutes.mods()}>Browse Mods</Link>
                     </Button>
                   </>
                 ) : (
@@ -159,6 +160,9 @@ export default function Welcome({
                         <Link href={register()}>Create Account</Link>
                       </Button>
                     )}
+                    <Button asChild variant="ghost" size="lg">
+                      <Link href={publicRoutes.mods()}>Browse Mods</Link>
+                    </Button>
                   </>
                 )}
               </div>
@@ -223,7 +227,7 @@ export default function Welcome({
                   </h3>
                 </div>
                 <Link
-                  href={mods.index()}
+                  href={publicRoutes.mods()}
                   className="inline-flex items-center text-sm font-medium text-primary transition-opacity hover:opacity-80"
                 >
                   Explore existing mods

@@ -382,6 +382,32 @@ class ModController extends Controller
     }
 
     /**
+     * Public listing of all public mods.
+     */
+    public function publicIndex(Request $request)
+    {
+        $query = $request->string('q')->toString();
+
+        $mods = Mod::where('visibility', 'public')
+            ->when($query, function ($q) use ($query) {
+                $q->where(function ($inner) use ($query) {
+                    $inner->where('name', 'like', '%'.$query.'%')
+                          ->orWhere('description', 'like', '%'.$query.'%');
+                });
+            })
+            ->with(['owner'])
+            ->withCount('publishedPages')
+            ->orderBy('updated_at', 'desc')
+            ->paginate(24)
+            ->withQueryString();
+
+        return Inertia::render('Public/Mods', [
+            'mods' => $mods,
+            'query' => $query,
+        ]);
+    }
+
+    /**
      * Public documentation view.
      */
     public function publicShow($slug)

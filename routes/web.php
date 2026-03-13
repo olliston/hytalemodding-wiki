@@ -118,6 +118,7 @@ Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified']], f
     Route::get('/mods/{mod:slug}/pages/{page:slug}/files', [FileController::class, 'getPageFiles'])->name('files.page');
 });
 
+Route::get('/mods', [ModController::class, 'publicIndex'])->name('public.mods');
 Route::get('/mod/{mod:slug}', [ModController::class, 'publicShow'])->name('public.mod');
 Route::get('/mod/{mod:slug}/{page:slug}', [PageController::class, 'publicShow'])->name('public.page');
 
