@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import hljs from 'highlight.js';
 import { marked } from 'marked';
 import markedFootnote from 'marked-footnote';
@@ -39,7 +40,7 @@ export default function MarkdownRenderer({
   useEffect(() => {
     const parseContent = async () => {
       const html = await marked.parse(content);
-      setHtmlContent(html);
+      setHtmlContent(DOMPurify.sanitize(html));
     };
 
     parseContent();
