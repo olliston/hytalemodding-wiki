@@ -92,7 +92,6 @@ export default function PublicPage({ mod, page, navigation }: Props) {
     ));
   };
 
-  // Find previous and next pages for navigation
   const flattenPages = (pages: NavigationPage[]): NavigationPage[] => {
     const result: NavigationPage[] = [];
     pages.forEach((p) => {
