@@ -1,12 +1,24 @@
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Head, useForm } from '@inertiajs/react';
-import { DownloadIcon, UploadIcon, FileIcon } from 'lucide-react';
+import {
+  DownloadIcon,
+  UploadIcon,
+  FileIcon,
+  ChevronRightIcon,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
+import { formatDate } from '@/utils/commonUtils';
 
 interface File {
   id: string;
@@ -41,7 +53,7 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
     files: [],
   });
 
-  const handleFileUpload = (e: React.FormEvent) => {
+  const handleFileUpload = (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!data.files.length) return;
 
@@ -62,16 +74,6 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
     if (bytes === 0) return '0 Bytes';
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
-  };
-
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
   };
 
   const deleteFile = (fileId: string) => {
@@ -105,26 +107,23 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
 
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <nav className="mb-4 text-sm text-gray-600">
-            <a
-              href={`/dashboard/mods/${mod.slug}`}
-              className="hover:text-gray-800"
-            >
+          <nav className="mb-4 text-sm text-primary">
+            <a href={`/dashboard/mods/${mod.slug}`} className="hover:underline">
               {mod.name}
             </a>
-            <span className="mx-2">›</span>
+            <ChevronRightIcon className="mx-1 inline h-4 w-4" />
             <span>Files</span>
           </nav>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-3xl font-bold text-primary">
                 File Management
               </h1>
-              <p className="mt-2 text-gray-600">
+              <p className="mt-2 text-muted-foreground">
                 Upload and manage files for your mod documentation
               </p>
             </div>
-            <Badge className="bg-blue-100 text-blue-800">
+            <Badge className="border border-gray-400 bg-transparent font-bold text-gray-400">
               {mod.storage_driver === 's3' ? 'S3 Storage' : 'Local Storage'}
             </Badge>
           </div>
@@ -151,7 +150,7 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
                     }
                     className="mt-1"
                   />
-                  <p className="mt-1 text-sm text-gray-600">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Maximum file size: 10MB. Supported formats: Images, PDFs,
                     Archives, Documents
                   </p>
@@ -175,11 +174,11 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
           <CardContent>
             {files.length === 0 ? (
               <div className="py-12 text-center">
-                <FileIcon className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-                <h3 className="mb-2 text-lg font-medium text-gray-900">
+                <FileIcon className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                <h3 className="mb-2 text-lg font-medium text-primary">
                   No files uploaded
                 </h3>
-                <p className="mb-4 text-gray-600">
+                <p className="mb-4 text-muted-foreground">
                   Upload files to include images, documents, and other assets in
                   your documentation
                 </p>
@@ -201,21 +200,30 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
                     key={file.id}
                     className="rounded-lg border p-4 transition-shadow hover:shadow-md"
                   >
-                    <div className="mb-3 flex items-start justify-between">
-                      <div className="flex items-center">
-                        <span className="mr-3 text-2xl">
+                    <div className="mb-3 flex items-start justify-between gap-2">
+                      <div className="flex min-w-0 items-center">
+                        <span className="mr-3 shrink-0 text-2xl">
                           {getFileIcon(file.mime_type)}
                         </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-gray-900">
-                            {file.original_name}
-                          </p>
-                          <p className="text-xs text-gray-500">
+                        <div className="min-w-0">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <p className="truncate text-sm font-medium text-primary">
+                                  {file.original_name}
+                                </p>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{file.original_name}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <p className="text-xs text-muted-foreground">
                             {formatFileSize(file.size)}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-1">
+                      <div className="flex shrink-0 items-center space-x-1">
                         <Button size="sm" variant="ghost" asChild>
                           <a
                             href={`/dashboard/mods/${mod.slug}/files/${file.id}/download`}
@@ -228,7 +236,7 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
                             size="sm"
                             variant="ghost"
                             onClick={() => deleteFile(file.id)}
-                            className="text-red-600 hover:text-red-700"
+                            className="text-destructive hover:text-destructive/80"
                           >
                             <TrashIcon className="h-3 w-3" />
                           </Button>
@@ -246,9 +254,9 @@ export default function FilesIndex({ mod, files, canEdit }: Props) {
                       </div>
                     )}
 
-                    <div className="space-y-1 text-xs text-gray-500">
+                    <div className="space-y-1 text-xs text-muted-foreground">
                       <p>Uploaded {formatDate(file.created_at)}</p>
-                      <p className="rounded bg-gray-100 px-2 py-1 font-mono text-xs">
+                      <p className="truncate rounded px-2 py-1 font-mono text-xs">
                         {file.url}
                       </p>
                     </div>
