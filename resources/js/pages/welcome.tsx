@@ -152,15 +152,7 @@ export default function Welcome({
                   </>
                 ) : (
                   <>
-                    <Button asChild size="lg">
-                      <Link href={login()}>Log In</Link>
-                    </Button>
-                    {canRegister && (
-                      <Button asChild variant="outline" size="lg">
-                        <Link href={register()}>Create Account</Link>
-                      </Button>
-                    )}
-                    <Button asChild variant="ghost" size="lg">
+                    <Button asChild variant="outline" size="lg">
                       <Link href={publicRoutes.mods()}>Browse Mods</Link>
                     </Button>
                   </>
@@ -169,20 +161,27 @@ export default function Welcome({
             </div>
 
             <div className="space-y-4 pt-1 lg:pt-2">
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
                 What teams use most
               </p>
               <div className="h-px w-full bg-border/70" />
               <div className="space-y-1">
                 {featureCards.map(({ title, description, icon: Icon }) => (
-                  <div key={title} className="border-b border-border/60 py-4 last:border-b-0">
+                  <div
+                    key={title}
+                    className="border-b border-border/60 py-4 last:border-b-0"
+                  >
                     <div className="mb-2 flex items-center gap-3">
                       <div className="rounded-md bg-primary/10 p-2 text-primary">
                         <Icon className="h-4 w-4" />
                       </div>
-                      <h2 className="text-sm font-semibold md:text-base">{title}</h2>
+                      <h2 className="text-sm font-semibold md:text-base">
+                        {title}
+                      </h2>
                     </div>
-                    <p className="pl-11 text-sm text-muted-foreground">{description}</p>
+                    <p className="pl-11 text-sm text-muted-foreground">
+                      {description}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -193,33 +192,35 @@ export default function Welcome({
             <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-linear-to-br from-primary/15 via-card to-card p-6 md:col-span-2 md:p-8">
               <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-purple-500/20 blur-3xl transition-transform duration-300 group-hover:scale-110" />
               <div className="relative space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">
+                <p className="text-xs font-semibold tracking-[0.18em] text-primary/80 uppercase">
                   Built for release-ready docs
                 </p>
                 <h2 className="max-w-lg text-2xl font-semibold tracking-tight md:text-3xl">
-                  Turn scattered notes into a source of truth your players can trust
+                  Turn scattered notes into a source of truth your players can
+                  trust
                 </h2>
                 <p className="max-w-xl text-muted-foreground">
-                  Organize setup, systems, changelogs, and contributor context so
-                  updates are easier to ship and easier to understand.
+                  Organize setup, systems, changelogs, and contributor context
+                  so updates are easier to ship and easier to understand.
                 </p>
               </div>
             </div>
 
             <div className="rounded-2xl border border-border/60 bg-card/75 p-6 backdrop-blur">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="mb-2 text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
                 Collaboration
               </p>
               <h3 className="text-lg font-semibold">Fewer docs bottlenecks</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Share ownership with contributors so pages stay current as features evolve.
+                Share ownership with contributors so pages stay current as
+                features evolve.
               </p>
             </div>
 
             <div className="rounded-2xl border border-border/60 bg-card/75 p-6 backdrop-blur md:col-span-3">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
                     Built-in structure
                   </p>
                   <h3 className="mt-1 text-lg font-semibold">
@@ -239,7 +240,7 @@ export default function Welcome({
 
           <section className="space-y-5">
             <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
                 Workflow
               </p>
               <h2 className="text-2xl font-semibold tracking-tight">
@@ -249,20 +250,24 @@ export default function Welcome({
 
             <div className="relative grid gap-6 md:grid-cols-3 md:gap-8 md:pt-8">
               <div className="pointer-events-none absolute top-0 left-0 hidden h-px w-full bg-border/70 md:block" />
-              {workflowSteps.map(({ title, description, icon: Icon }, index) => (
-                <div key={title} className="relative space-y-3 md:pt-2">
-                  <div className="inline-flex items-center gap-3">
-                    <div className="rounded-md bg-secondary p-2 text-secondary-foreground">
-                      <Icon className="h-4 w-4" />
+              {workflowSteps.map(
+                ({ title, description, icon: Icon }, index) => (
+                  <div key={title} className="relative space-y-3 md:pt-2">
+                    <div className="inline-flex items-center gap-3">
+                      <div className="rounded-md bg-secondary p-2 text-secondary-foreground">
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <span className="text-xs font-semibold tracking-[0.15em] text-muted-foreground uppercase">
+                        Step {index + 1}
+                      </span>
                     </div>
-                    <span className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                      Step {index + 1}
-                    </span>
+                    <h3 className="text-lg font-semibold">{title}</h3>
+                    <p className="max-w-sm text-sm text-muted-foreground">
+                      {description}
+                    </p>
                   </div>
-                  <h3 className="text-lg font-semibold">{title}</h3>
-                  <p className="max-w-sm text-sm text-muted-foreground">{description}</p>
-                </div>
-              ))}
+                ),
+              )}
             </div>
           </section>
 
