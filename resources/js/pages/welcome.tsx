@@ -146,7 +146,7 @@ export default function Welcome({
                   Built for release-ready docs
                 </p>
                 <h2 className="max-w-lg text-2xl font-semibold tracking-tight md:text-3xl">
-                  Turn scattered notes into a source of truth your players can
+                  Turn scattered notes into clear documentation your players can
                   trust
                 </h2>
                 <p className="max-w-xl text-muted-foreground">
@@ -194,7 +194,7 @@ export default function Welcome({
                 Workflow
               </p>
               <h2 className="text-2xl font-semibold tracking-tight">
-                A cleaner path from idea to publish
+                From Idea to Publishing
               </h2>
             </div>
 
