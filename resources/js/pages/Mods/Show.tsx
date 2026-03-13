@@ -57,6 +57,7 @@ interface Mod {
   collaborators: Collaborator[];
   root_pages: Page[];
   index_page?: Page;
+  github_repository_url?: string | null;
 }
 
 interface Props {
@@ -68,6 +69,7 @@ interface Props {
 
 export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
   useFlashMessages();
+  const isGithubManaged = Boolean(mod.github_repository_url);
 
   const renderPageTree = (pages: Page[], level = 0) => {
     return pages.map((page) => (
@@ -93,7 +95,7 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
                 <EyeIcon className="h-3 w-3" />
               </a>
             </Button>
-            {canEdit && (
+            {canEdit && !isGithubManaged && (
               <Button size="sm" variant="ghost" asChild>
                 <a href={`/dashboard/mods/${mod.slug}/pages/${page.slug}/edit`}>
                   <PencilIcon className="h-3 w-3" />
@@ -186,7 +188,7 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center justify-between gap-2">
                     <h1 className="font-semibold">Pages</h1>
-                    {canEdit && (
+                    {canEdit && !isGithubManaged && (
                       <Button size="sm" variant="outline" asChild>
                         <a href={`/dashboard/mods/${mod.slug}/pages/create`}>
                           <PlusIcon className="mr-2 h-4 w-4" />
@@ -205,7 +207,7 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
                         <p className="mb-4 text-muted-foreground">
                           Start documenting your mod by creating your first page
                         </p>
-                        {canEdit && (
+                        {canEdit && !isGithubManaged && (
                           <Button asChild>
                             <a
                               href={`/dashboard/mods/${mod.slug}/pages/create`}
@@ -220,6 +222,11 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
                         {renderPageTree(mod.root_pages)}
                       </div>
                     )}
+                    {isGithubManaged && (
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Pages are managed by GitHub sync.
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -228,7 +235,7 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
               <Separator orientation="vertical" />
             </div>
             <div className="w-xs space-y-6">
-              <QuickActions mod={mod} />
+              <QuickActions mod={mod} isGithubManaged={isGithubManaged} />
               <div className="mx-4">
                 <Separator />
               </div>
@@ -322,20 +329,22 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
   );
 }
 
-function QuickActions({ mod }: { mod: Mod }) {
+function QuickActions({ mod, isGithubManaged }: { mod: Mod; isGithubManaged: boolean }) {
   return (
     <div className="flex flex-col gap-4">
       <div>
         <h1 className="flex items-center gap-2 font-semibold">Quick Actions</h1>
       </div>
       <div className="flex flex-col gap-2">
-        <QuickActionButton
-          icon={Plus}
-          label="New Page"
-          description="Start a new Page for your mod documentation"
-          href={`/dashboard/mods/${mod.slug}/pages/create`}
-          variant="primary"
-        />
+        {!isGithubManaged && (
+          <QuickActionButton
+            icon={Plus}
+            label="New Page"
+            description="Start a new Page for your mod documentation"
+            href={`/dashboard/mods/${mod.slug}/pages/create`}
+            variant="primary"
+          />
+        )}
         <QuickActionButton
           label="Upload Files"
           description="Upload and manage files for your mod documentation"

@@ -45,6 +45,7 @@ interface Mod {
   description: string;
   visibility: 'public' | 'private' | 'unlisted';
   owner: User;
+  github_repository_url?: string | null;
 }
 
 interface Props {
@@ -57,9 +58,10 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
   const [pagesList, setPagesList] = useState(pages);
   const [isDragDisabled, setIsDragDisabled] = useState(false);
   const [isDragModeEnabled, setIsDragModeEnabled] = useState(false);
+  const isGithubManaged = Boolean(mod.github_repository_url);
 
   const handleDragEnd = async (result: DropResult) => {
-    if (!result.destination || !canEdit || !isDragModeEnabled) {
+    if (!result.destination || !canEdit || !isDragModeEnabled || isGithubManaged) {
       return;
     }
 
@@ -135,7 +137,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
       key={page.id}
       draggableId={page.id}
       index={index}
-      isDragDisabled={!canEdit || isDragDisabled || !isDragModeEnabled}
+      isDragDisabled={!canEdit || isDragDisabled || !isDragModeEnabled || isGithubManaged}
     >
       {(provided, snapshot) => (
         <tr
@@ -247,7 +249,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
                   <EyeIcon className="h-3 w-3" />
                 </a>
               </Button>
-              {canEdit && (
+              {canEdit && !isGithubManaged && (
                 <Button
                   size="sm"
                   variant="ghost"
@@ -358,7 +360,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
               </p>
             </div>
             <div className="flex items-center space-x-3">
-              {canEdit && (
+              {canEdit && !isGithubManaged && (
                 <Button
                   variant={isDragModeEnabled ? 'default' : 'outline'}
                   onClick={() => setIsDragModeEnabled(!isDragModeEnabled)}
@@ -368,7 +370,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
                   {isDragModeEnabled ? 'Exit Reorder Mode' : 'Reorder Pages'}
                 </Button>
               )}
-              {canEdit && (
+              {canEdit && !isGithubManaged && (
                 <Button asChild>
                   <a href={`/dashboard/mods/${mod.slug}/pages/create`}>
                     <PlusIcon className="mr-2 h-4 w-4" />
@@ -380,7 +382,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
           </div>
         </div>
 
-        {isDragModeEnabled && canEdit && (
+        {isDragModeEnabled && canEdit && !isGithubManaged && (
           <div className="mb-6 rounded-lg border border-accent bg-accent p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
@@ -416,7 +418,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
               <p className="mb-4 text-muted-foreground">
                 Start documenting your mod by creating your first page
               </p>
-              {canEdit && (
+              {canEdit && !isGithubManaged && (
                 <Button asChild>
                   <a href={`/dashboard/mods/${mod.slug}/pages/create`}>
                     Create First Page
@@ -427,6 +429,11 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
           </Card>
         ) : (
           <div className="space-y-4">
+            {isGithubManaged && (
+              <p className="text-sm text-muted-foreground">
+                This mod is GitHub-managed. Manual page creation and editing are disabled.
+              </p>
+            )}
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-semibold text-primary">
                 {pagesList.length} Pages

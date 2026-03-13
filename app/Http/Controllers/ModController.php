@@ -162,7 +162,17 @@ class ModController extends Controller
             'storage_driver' => 'required|in:local,s3',
             'icon' => 'nullable|file|image|max:2048|mimes:jpeg,png,gif,webp',
             'external_access' => 'nullable|boolean',
+            'github_repository_url' => ['nullable', 'string', 'max:255', 'url', 'regex:/^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+(?:\.git)?\/?$/'],
+            'github_repository_path' => 'nullable|string|max:512',
         ]);
+
+        $validated['github_repository_url'] = blank($validated['github_repository_url'] ?? null)
+            ? null
+            : trim((string) $validated['github_repository_url']);
+
+        $validated['github_repository_path'] = blank($validated['github_repository_path'] ?? null)
+            ? null
+            : trim((string) $validated['github_repository_path'], '/');
 
         if ($validated['name'] !== $mod->name) {
             $slug = Str::slug($validated['name']);

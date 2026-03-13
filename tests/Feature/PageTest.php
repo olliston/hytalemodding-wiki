@@ -384,4 +384,53 @@ class PageTest extends TestCase
 
         $response->assertStatus(422);
     }
+
+    public function test_owner_cannot_create_page_manually_when_mod_is_github_managed()
+    {
+        $user = User::factory()->create();
+        $mod = Mod::factory()->create([
+            'owner_id' => $user->id,
+            'github_repository_url' => 'https://github.com/acme/docs-repo',
+        ]);
+
+        $this->actingAs($user);
+
+        $response = $this->post(route('pages.store', $mod), [
+            'title' => 'Should Not Be Created',
+            'content' => 'Manual content',
+            'published' => true,
+        ]);
+
+        $response->assertStatus(423);
+        $this->assertDatabaseMissing('pages', [
+            'mod_id' => $mod->id,
+            'title' => 'Should Not Be Created',
+        ]);
+    }
+
+    public function test_owner_cannot_update_page_manually_when_mod_is_github_managed()
+    {
+        $user = User::factory()->create();
+        $mod = Mod::factory()->create([
+            'owner_id' => $user->id,
+            'github_repository_url' => 'https://github.com/acme/docs-repo',
+        ]);
+        $page = Page::factory()->create(['mod_id' => $mod->id]);
+
+        $this->actingAs($user);
+
+        $response = $this->patch(route('pages.update', [$mod, $page]), [
+            'title' => 'Should Not Update',
+            'content' => 'Updated content',
+            'parent_id' => null,
+            'is_index' => false,
+            'published' => true,
+        ]);
+
+        $response->assertStatus(423);
+        $this->assertDatabaseMissing('pages', [
+            'id' => $page->id,
+            'title' => 'Should Not Update',
+        ]);
+    }
 }

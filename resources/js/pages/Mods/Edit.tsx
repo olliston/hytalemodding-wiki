@@ -38,6 +38,8 @@ interface Mod {
   visibility: 'public' | 'private' | 'unlisted';
   storage_driver: 'local';
   external_access: boolean;
+  github_repository_url?: string | null;
+  github_repository_path?: string | null;
 }
 
 interface Props {
@@ -55,6 +57,8 @@ export default function EditMod({ mod }: Props) {
     visibility: mod.visibility,
     storage_driver: mod.storage_driver,
     external_access: mod.external_access || false,
+    github_repository_url: mod.github_repository_url || '',
+    github_repository_path: mod.github_repository_path || '',
     icon: null as File | null,
   });
 
@@ -268,6 +272,64 @@ export default function EditMod({ mod }: Props) {
                       Maximum size: 2MB.
                     </p>
                   </div>
+                  <Separator />
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="github_repository_url">
+                        GitHub Repository URL
+                      </Label>
+                      <Input
+                        id="github_repository_url"
+                        type="url"
+                        value={data.github_repository_url}
+                        onChange={(e) =>
+                          setData('github_repository_url', e.target.value)
+                        }
+                        placeholder="https://github.com/owner/repository"
+                        className={cn(
+                          errors.github_repository_url ? 'border-destructive' : '',
+                        )}
+                      />
+                      {errors.github_repository_url && (
+                        <p className="mt-1 text-sm text-destructive">
+                          {errors.github_repository_url}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="github_repository_path">
+                        Repository Path
+                      </Label>
+                      <Input
+                        id="github_repository_path"
+                        type="text"
+                        value={data.github_repository_path}
+                        onChange={(e) =>
+                          setData('github_repository_path', e.target.value)
+                        }
+                        placeholder="docs"
+                        className={cn(
+                          errors.github_repository_path ? 'border-destructive' : '',
+                        )}
+                      />
+                      {errors.github_repository_path && (
+                        <p className="mt-1 text-sm text-destructive">
+                          {errors.github_repository_path}
+                        </p>
+                      )}
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Optional subfolder to sync markdown from (for example:
+                        docs/guides). Leave blank to sync the repository root.
+                      </p>
+                    </div>
+
+                    <p className="text-sm text-muted-foreground">
+                      When a GitHub URL is configured, pages are managed by sync
+                      and manual page create/edit is disabled.
+                    </p>
+                  </div>
+
                   <Separator />
                   <div className="flex items-center space-x-3">
                     <Switch

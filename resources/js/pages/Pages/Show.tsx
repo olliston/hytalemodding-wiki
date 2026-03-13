@@ -20,6 +20,7 @@ interface Mod {
   name: string;
   slug: string;
   visibility: 'public' | 'private' | 'unlisted';
+  github_repository_url?: string | null;
 }
 
 interface Page {
@@ -57,6 +58,8 @@ interface Props {
 }
 
 export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
+  const isGithubManaged = Boolean(mod.github_repository_url);
+
   const renderNavigation = (pages: NavigationPage[], level = 0) => {
     return pages
       .filter((navPage) => navPage.published || canEdit)
@@ -104,7 +107,7 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
               <CardContent>
                 <nav className="space-y-1">{renderNavigation(navigation)}</nav>
 
-                {canEdit && (
+                {canEdit && !isGithubManaged && (
                   <div className="border-t pt-4">
                     <Button
                       size="sm"
@@ -187,7 +190,7 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
                     </a>
                   </Button>
                 )}
-                {canEdit && (
+                {canEdit && !isGithubManaged && (
                   <Button size="sm" asChild>
                     <a
                       href={`/dashboard/mods/${mod.slug}/pages/${page.slug}/edit`}
@@ -196,6 +199,11 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
                       Edit
                     </a>
                   </Button>
+                )}
+                {canEdit && isGithubManaged && (
+                  <p className="text-sm text-muted-foreground">
+                    This page is synced from GitHub and cannot be edited manually.
+                  </p>
                 )}
               </div>
             </div>
@@ -246,7 +254,7 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
                   Last updated by {page.updater?.name || page.creator.name}
                   on {formatDate(page.updated_at)}
                 </div>
-                {canEdit && (
+                {canEdit && !isGithubManaged && (
                   <Button size="sm" variant="outline" asChild>
                     <a
                       href={`/dashboard/mods/${mod.slug}/pages/${page.slug}/edit`}

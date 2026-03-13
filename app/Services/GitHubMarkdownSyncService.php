@@ -43,6 +43,15 @@ class GitHubMarkdownSyncService
             /** @var array<string, \App\Models\Page> $pagesBySourcePath */
             $pagesBySourcePath = [];
 
+            $legacyPagesQuery = Page::where('mod_id', $mod->id)
+                ->where(function ($query) {
+                    $query->whereNull('source_type')
+                        ->orWhere('source_type', '!=', 'github');
+                });
+
+            $deleted += (clone $legacyPagesQuery)->count();
+            $legacyPagesQuery->delete();
+
             $existingGithubPages = Page::withTrashed()
                 ->where('mod_id', $mod->id)
                 ->where('source_type', 'github')
@@ -52,6 +61,8 @@ class GitHubMarkdownSyncService
             foreach ($files as $orderIndex => $file) {
                 $sourcePath = $file['path'];
                 $page = $existingGithubPages->get($sourcePath);
+                $parsedContent = $this->parseFrontMatter($file['content']);
+                $metadata = $parsedContent['metadata'];
 
                 $isNew = false;
 
@@ -68,12 +79,12 @@ class GitHubMarkdownSyncService
                 $page->source_type = 'github';
                 $page->source_path = $sourcePath;
                 $page->source_sha = $file['sha'];
-                $page->title = $this->titleFromPath($sourcePath);
-                $page->content = $file['content'];
-                $page->published = true;
+                $page->title = $this->resolveTitle($sourcePath, $metadata);
+                $page->content = $parsedContent['content'];
+                $page->published = $this->resolvePublished($metadata);
                 $page->updated_by = $mod->owner_id;
-                $page->order_index = $orderIndex;
-                $page->is_index = $sourcePath === 'README.md';
+                $page->order_index = $this->resolveOrderIndex($metadata, $orderIndex);
+                $page->is_index = $this->resolveIndexFlag($sourcePath, $metadata);
 
                 if (! $page->slug) {
                     $page->slug = $this->buildUniqueSlug($mod, $page->title, $page->id);
@@ -287,6 +298,128 @@ class GitHubMarkdownSyncService
         }
 
         return Str::headline($filename);
+    }
+
+    /**
+     * @param  array<string, mixed>  $metadata
+     */
+    private function resolveTitle(string $sourcePath, array $metadata): string
+    {
+        $title = $metadata['title'] ?? null;
+
+        if (is_string($title) && trim($title) !== '') {
+            return trim($title);
+        }
+
+        return $this->titleFromPath($sourcePath);
+    }
+
+    /**
+     * @param  array<string, mixed>  $metadata
+     */
+    private function resolvePublished(array $metadata): bool
+    {
+        if (isset($metadata['published']) && is_bool($metadata['published'])) {
+            return $metadata['published'];
+        }
+
+        if (isset($metadata['draft']) && is_bool($metadata['draft'])) {
+            return ! $metadata['draft'];
+        }
+
+        return true;
+    }
+
+    /**
+     * @param  array<string, mixed>  $metadata
+     */
+    private function resolveIndexFlag(string $sourcePath, array $metadata): bool
+    {
+        if (isset($metadata['is_index']) && is_bool($metadata['is_index'])) {
+            return $metadata['is_index'];
+        }
+
+        return $sourcePath === 'README.md';
+    }
+
+    /**
+     * @param  array<string, mixed>  $metadata
+     */
+    private function resolveOrderIndex(array $metadata, int $default): int
+    {
+        $order = $metadata['order'] ?? null;
+
+        return is_int($order) ? $order : $default;
+    }
+
+    /**
+     * @return array{metadata: array<string, mixed>, content: string}
+     */
+    private function parseFrontMatter(string $rawContent): array
+    {
+        if (! preg_match('/\A---\r?\n(?<frontmatter>.*?)\r?\n---\r?\n(?<content>.*)\z/s', $rawContent, $matches)) {
+            return [
+                'metadata' => [],
+                'content' => $rawContent,
+            ];
+        }
+
+        $metadata = [];
+
+        foreach (preg_split('/\r?\n/', (string) $matches['frontmatter']) as $line) {
+            $line = trim($line);
+
+            if ($line === '' || str_starts_with($line, '#')) {
+                continue;
+            }
+
+            [$key, $value] = array_pad(explode(':', $line, 2), 2, null);
+
+            if ($value === null) {
+                continue;
+            }
+
+            $key = trim((string) $key);
+            $value = trim((string) $value);
+
+            if ($key === '') {
+                continue;
+            }
+
+            $metadata[$key] = $this->parseFrontMatterValue($value);
+        }
+
+        return [
+            'metadata' => $metadata,
+            'content' => (string) $matches['content'],
+        ];
+    }
+
+    /**
+     * @return string|bool|int
+     */
+    private function parseFrontMatterValue(string $value)
+    {
+        if ($value === 'true') {
+            return true;
+        }
+
+        if ($value === 'false') {
+            return false;
+        }
+
+        if (preg_match('/^-?\d+$/', $value)) {
+            return (int) $value;
+        }
+
+        if (
+            (str_starts_with($value, '"') && str_ends_with($value, '"')) ||
+            (str_starts_with($value, "'") && str_ends_with($value, "'"))
+        ) {
+            return substr($value, 1, -1);
+        }
+
+        return $value;
     }
 
     private function parentReadmeSourcePath(string $sourcePath): ?string

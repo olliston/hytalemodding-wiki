@@ -76,7 +76,7 @@ class SyncGithubMarkdownCommandTest extends TestCase
             'https://raw.githubusercontent.com/acme/docs-repo/main/docs/README.md' => Http::response("# Welcome\n\nRoot docs", 200),
             'https://raw.githubusercontent.com/acme/docs-repo/main/docs/getting-started.md' => Http::response("# Getting Started", 200),
             'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/README.md' => Http::response("# Guide", 200),
-            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/install.md' => Http::response("# Install", 200),
+            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/install.md' => Http::response("---\ntitle: Installation Guide\norder: 7\npublished: false\n---\n# Install", 200),
         ]);
 
         $this->artisan('mods:sync-github-markdown')->assertSuccessful();
@@ -98,6 +98,9 @@ class SyncGithubMarkdownCommandTest extends TestCase
             ->where('source_path', 'guide/install.md')
             ->firstOrFail();
 
+        $this->assertSame('Installation Guide', $installPage->title);
+        $this->assertSame(7, $installPage->order_index);
+        $this->assertFalse($installPage->published);
         $this->assertSame($guideReadme->id, $installPage->parent_id);
     }
 
@@ -123,6 +126,64 @@ class SyncGithubMarkdownCommandTest extends TestCase
         $this->assertDatabaseHas('pages', [
             'mod_id' => $mod->id,
             'source_path' => 'guide/install.md',
+        ]);
+    }
+
+    public function test_it_deletes_non_github_pages_for_github_managed_mods(): void
+    {
+        $owner = User::factory()->create();
+
+        $mod = Mod::factory()->create([
+            'owner_id' => $owner->id,
+            'github_repository_url' => 'https://github.com/acme/docs-repo',
+            'github_repository_path' => '/docs/',
+        ]);
+
+        $legacyPage = Page::factory()->create([
+            'mod_id' => $mod->id,
+            'title' => 'Legacy Manual Page',
+            'source_type' => null,
+        ]);
+
+        $this->fakeRepoContents('# Install');
+
+        $this->artisan('mods:sync-github-markdown')->assertSuccessful();
+
+        $legacyPage->refresh();
+        $this->assertNotNull($legacyPage->deleted_at);
+
+        $this->assertDatabaseHas('pages', [
+            'mod_id' => $mod->id,
+            'source_type' => 'github',
+            'source_path' => 'README.md',
+        ]);
+    }
+
+    public function test_dry_run_does_not_delete_non_github_pages(): void
+    {
+        $owner = User::factory()->create();
+
+        $mod = Mod::factory()->create([
+            'owner_id' => $owner->id,
+            'github_repository_url' => 'https://github.com/acme/docs-repo',
+            'github_repository_path' => '/docs/',
+        ]);
+
+        $legacyPage = Page::factory()->create([
+            'mod_id' => $mod->id,
+            'title' => 'Legacy Manual Page',
+            'source_type' => null,
+        ]);
+
+        $this->fakeRepoContents('# Install');
+
+        $this->artisan('mods:sync-github-markdown', ['--dry-run' => true])->assertSuccessful();
+
+        $legacyPage->refresh();
+        $this->assertNull($legacyPage->deleted_at);
+        $this->assertDatabaseMissing('pages', [
+            'mod_id' => $mod->id,
+            'source_type' => 'github',
         ]);
     }
 

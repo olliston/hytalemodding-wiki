@@ -240,4 +240,27 @@ class ModTest extends TestCase
         $this->assertNotNull($mod);
         $this->assertEquals('my-awesome-mod-name', $mod->slug);
     }
+
+    public function test_owner_can_update_mod_with_github_settings()
+    {
+        $user = User::factory()->create();
+        $mod = Mod::factory()->create(['owner_id' => $user->id]);
+        $this->actingAs($user);
+
+        $response = $this->patch(route('mods.update', $mod), [
+            'name' => $mod->name,
+            'description' => $mod->description,
+            'visibility' => $mod->visibility,
+            'storage_driver' => $mod->storage_driver,
+            'external_access' => true,
+            'github_repository_url' => 'https://github.com/acme/docs-repo',
+            'github_repository_path' => '/docs/guides/',
+        ]);
+
+        $response->assertRedirect(route('mods.show', $mod));
+
+        $mod->refresh();
+        $this->assertSame('https://github.com/acme/docs-repo', $mod->github_repository_url);
+        $this->assertSame('docs/guides', $mod->github_repository_path);
+    }
 }

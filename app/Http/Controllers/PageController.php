@@ -48,6 +48,8 @@ class PageController extends Controller
             abort(403);
         }
 
+        $this->ensureManualPageEditingAllowed($mod);
+
         $parentId = $request->get('parent_id');
         $parent = $parentId ? Page::findOrFail($parentId) : null;
 
@@ -73,6 +75,8 @@ class PageController extends Controller
         if (! $mod->userCan($user, 'edit')) {
             abort(403);
         }
+
+        $this->ensureManualPageEditingAllowed($mod);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -227,6 +231,8 @@ class PageController extends Controller
             abort(403);
         }
 
+        $this->ensureManualPageEditingAllowed($mod);
+
         $page->load(['parent']);
 
         $potentialParents = $mod->pages()
@@ -255,6 +261,8 @@ class PageController extends Controller
         if (! $mod->userCan($user, 'edit')) {
             abort(403);
         }
+
+        $this->ensureManualPageEditingAllowed($mod);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -327,6 +335,8 @@ class PageController extends Controller
             abort(403);
         }
 
+        $this->ensureManualPageEditingAllowed($mod);
+
         $validated = $request->validate([
             'pages' => 'required|array',
             'pages.*.id' => 'required|uuid|exists:pages,id',
@@ -366,6 +376,8 @@ class PageController extends Controller
             abort(403);
         }
 
+        $this->ensureManualPageEditingAllowed($mod);
+
         $validated = $request->validate([
             'content' => 'required|string',
         ]);
@@ -376,6 +388,13 @@ class PageController extends Controller
         ]);
 
         return response()->json(['success' => true, 'updated_at' => $page->fresh()->updated_at]);
+    }
+
+    private function ensureManualPageEditingAllowed(Mod $mod): void
+    {
+        if (! blank($mod->github_repository_url)) {
+            abort(423, 'This mod is managed by GitHub sync. Manual page creation and editing are disabled.');
+        }
     }
 
     /**
