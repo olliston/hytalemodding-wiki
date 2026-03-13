@@ -39,7 +39,7 @@ export default function PublicLayout({
           modIconUrl={modIconUrl}
         />
       ) : (
-        <AppNavbar />
+        <AppNavbar brandHref="/" />
       )}
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">

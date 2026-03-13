@@ -22,7 +22,13 @@ import { mainNavItems } from '@/utils/commonUtils';
 import HytaleModdingLogo from './hytale-modding-logo';
 import { UserMenuContent } from './user-menu-content';
 
-export default function AppNavbar() {
+interface AppNavbarProps {
+  brandHref?: string;
+}
+
+export default function AppNavbar({
+  brandHref = dashboard().url,
+}: AppNavbarProps) {
   const { isCurrentUrl } = useCurrentUrl();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -31,7 +37,7 @@ export default function AppNavbar() {
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <div className="flex items-center space-x-4">
           <Link
-            href={dashboard().url}
+            href={brandHref}
             className="flex items-center space-x-2 transition-opacity hover:opacity-80"
           >
             <HytaleModdingLogo variant="icon" size="md" />

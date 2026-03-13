@@ -68,7 +68,7 @@ export default function PublicMods({ mods, query }: Props) {
       <Head title="Browse Mods" />
 
       <div className="flex min-h-screen flex-col bg-background text-foreground">
-        <AppNavbar />
+        <AppNavbar brandHref="/" />
 
         <main className="mx-auto w-full max-w-7xl flex-1 px-6 py-10 md:px-8 md:py-14">
           {/* Header */}
