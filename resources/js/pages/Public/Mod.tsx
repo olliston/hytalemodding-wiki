@@ -30,6 +30,7 @@ interface Page {
   id: string;
   title: string;
   slug: string;
+  kind: 'page' | 'category';
   content?: string;
   published: boolean;
   updated_at: string;
@@ -52,20 +53,32 @@ export default function PublicMod({ mod }: Props) {
   const renderPageTree = (pages: Page[], level = 0) => {
     return pages.map((page) => (
       <div key={page.id} className={`ml-${level * 3}`}>
-        <a
-          href={`/mod/${mod.slug}/${page.slug}`}
-          className="group flex items-center rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
-        >
-          <BookOpenIcon className="mr-2 h-4 w-4 text-muted-foreground group-hover:text-foreground" />
-          <span className="text-foreground group-hover:text-accent-foreground">
-            {page.title}
-          </span>
-          {!page.published && (
-            <Badge variant="outline" className="ml-2 text-xs">
-              Draft
-            </Badge>
-          )}
-        </a>
+        {page.kind === 'category' ? (
+          <div className="flex items-center rounded-md px-3 py-2 text-sm">
+            <BookOpenIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+            <span className="text-foreground">{page.title}</span>
+            {!page.published && (
+              <Badge variant="outline" className="ml-2 text-xs">
+                Draft
+              </Badge>
+            )}
+          </div>
+        ) : (
+          <a
+            href={`/mod/${mod.slug}/${page.slug}`}
+            className="group flex items-center rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
+          >
+            <BookOpenIcon className="mr-2 h-4 w-4 text-muted-foreground group-hover:text-foreground" />
+            <span className="text-foreground group-hover:text-accent-foreground">
+              {page.title}
+            </span>
+            {!page.published && (
+              <Badge variant="outline" className="ml-2 text-xs">
+                Draft
+              </Badge>
+            )}
+          </a>
+        )}
         {page.children && page.children.length > 0 && (
           <div className="ml-3 border-l border-border/50 pl-3">
             {renderPageTree(page.children, level + 1)}
@@ -74,6 +87,10 @@ export default function PublicMod({ mod }: Props) {
       </div>
     ));
   };
+
+  const featuredPages = mod.root_pages
+    .filter((page) => page.kind !== 'category')
+    .slice(0, 3);
 
   return (
     <PublicLayout
@@ -165,12 +182,12 @@ export default function PublicMod({ mod }: Props) {
                     Browse through the navigation on the left to explore the
                     available documentation pages.
                   </p>
-                  {mod.root_pages.length > 0 && (
+                  {featuredPages.length > 0 && (
                     <div className="mx-auto grid max-w-2xl gap-4">
                       <h4 className="mb-4 text-left font-semibold">
                         Featured Pages
                       </h4>
-                      {mod.root_pages.slice(0, 3).map((page) => (
+                      {featuredPages.map((page) => (
                         <Card
                           key={page.id}
                           className="text-left transition-shadow hover:shadow-md"

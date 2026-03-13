@@ -314,6 +314,48 @@ class PageTest extends TestCase
         $this->assertEquals($parentPage->id, $childPage->parent_id);
     }
 
+    public function test_owner_can_create_category_without_content()
+    {
+        $user = User::factory()->create();
+        $mod = Mod::factory()->create(['owner_id' => $user->id]);
+        $this->actingAs($user);
+
+        $response = $this->post(route('pages.store', $mod), [
+            'title' => 'Guides',
+            'kind' => 'category',
+            'content' => null,
+            'published' => true,
+        ]);
+
+        $response->assertRedirect();
+
+        $this->assertDatabaseHas('pages', [
+            'mod_id' => $mod->id,
+            'title' => 'Guides',
+            'kind' => 'category',
+            'is_index' => false,
+        ]);
+    }
+
+    public function test_category_cannot_be_saved_as_index_page()
+    {
+        $user = User::factory()->create();
+        $mod = Mod::factory()->create(['owner_id' => $user->id]);
+        $this->actingAs($user);
+
+        $response = $this->post(route('pages.store', $mod), [
+            'title' => 'API',
+            'kind' => 'category',
+            'is_index' => true,
+            'published' => true,
+        ]);
+
+        $response->assertRedirect();
+
+        $page = Page::where('mod_id', $mod->id)->where('title', 'API')->firstOrFail();
+        $this->assertFalse($page->is_index);
+    }
+
     public function test_can_reorder_pages()
     {
         $user = User::factory()->create();

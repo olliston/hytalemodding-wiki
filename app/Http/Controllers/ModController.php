@@ -109,11 +109,19 @@ class ModController extends Controller
             abort(403);
         }
 
+        $publishedChildren = function ($query) use (&$publishedChildren) {
+            $query->where('published', true)
+                ->orderBy('order_index')
+                ->with(['children' => $publishedChildren]);
+        };
+
         $mod->load([
             'owner',
             'collaborators',
-            'rootPages' => function ($query) {
-                $query->published()->with('publishedChildren');
+            'rootPages' => function ($query) use ($publishedChildren) {
+                $query->published()
+                    ->orderBy('order_index')
+                    ->with(['children' => $publishedChildren]);
             },
             'indexPage',
         ]);
@@ -404,6 +412,7 @@ class ModController extends Controller
                         'id' => $page->id,
                         'title' => $page->title,
                         'slug' => $page->slug,
+                        'kind' => $page->kind,
                         'content' => substr($page->content ?? '', 0, 200),
                         'published' => $page->published,
                         'updated_at' => $page->updated_at,
@@ -412,6 +421,7 @@ class ModController extends Controller
                                 'id' => $child->id,
                                 'title' => $child->title,
                                 'slug' => $child->slug,
+                                'kind' => $child->kind,
                                 'published' => $child->published,
                             ];
                         })->toArray(),
@@ -421,6 +431,7 @@ class ModController extends Controller
                     'id' => $indexPage->id,
                     'title' => $indexPage->title,
                     'slug' => $indexPage->slug,
+                    'kind' => $indexPage->kind,
                     'content' => $indexPage->content,
                     'updated_at' => $indexPage->updated_at,
                 ] : null,

@@ -52,6 +52,9 @@ class PageController extends Controller
 
         $parentId = $request->get('parent_id');
         $parent = $parentId ? Page::findOrFail($parentId) : null;
+        $initialKind = $request->get('kind') === Page::KIND_CATEGORY
+            ? Page::KIND_CATEGORY
+            : Page::KIND_PAGE;
 
         $potentialParents = $mod->pages()
             ->where('id', '!=', $parent?->id)
@@ -62,6 +65,7 @@ class PageController extends Controller
             'mod' => $mod,
             'parent' => $parent,
             'potentialParents' => $potentialParents,
+            'initialKind' => $initialKind,
         ]);
     }
 
@@ -80,13 +84,16 @@ class PageController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'kind' => 'nullable|in:page,category',
             'content' => 'nullable|string',
             'parent_id' => 'nullable|uuid|exists:pages,id',
             'is_index' => 'boolean',
             'published' => 'boolean',
         ]);
 
-        if ($validated['parent_id']) {
+        $validated['kind'] = $validated['kind'] ?? Page::KIND_PAGE;
+
+        if ($validated['parent_id'] ?? null) {
             $parent = Page::findOrFail($validated['parent_id']);
             if ($parent->mod_id !== $mod->id) {
                 abort(422, 'Parent page must belong to the same mod.');
@@ -102,6 +109,10 @@ class PageController extends Controller
             $counter++;
         }
 
+        if (($validated['kind'] ?? Page::KIND_PAGE) === Page::KIND_CATEGORY) {
+            $validated['is_index'] = false;
+        }
+
         if ($validated['is_index'] ?? false) {
             $mod->pages()->where('is_index', true)->update(['is_index' => false]);
         }
@@ -111,6 +122,7 @@ class PageController extends Controller
             'parent_id' => $validated['parent_id'] ?? null,
             'title' => $validated['title'],
             'slug' => $slug,
+            'kind' => $validated['kind'],
             'content' => $validated['content'] ?? '',
             'is_index' => $validated['is_index'] ?? false,
             'published' => $validated['published'] ?? true,
@@ -155,12 +167,14 @@ class PageController extends Controller
                     'id' => $navPage->id,
                     'title' => $navPage->title,
                     'slug' => $navPage->slug,
+                    'kind' => $navPage->kind,
                     'published' => $navPage->published,
                     'children' => $navPage->children->map(function ($child) {
                         return [
                             'id' => $child->id,
                             'title' => $child->title,
                             'slug' => $child->slug,
+                            'kind' => $child->kind,
                             'published' => $child->published,
                         ];
                     })->toArray(),
@@ -206,6 +220,7 @@ class PageController extends Controller
                         'id' => $child->id,
                         'title' => $child->title,
                         'slug' => $child->slug,
+                        'kind' => $child->kind,
                         'content' => substr($child->content ?? '', 0, 200),
                     ];
                 })->toArray(),
@@ -266,17 +281,24 @@ class PageController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'kind' => 'nullable|in:page,category',
             'content' => 'nullable|string',
             'parent_id' => 'nullable|uuid|exists:pages,id',
             'is_index' => 'boolean',
             'published' => 'boolean',
         ]);
 
-        if ($validated['parent_id']) {
+        $validated['kind'] = $validated['kind'] ?? $page->kind ?? Page::KIND_PAGE;
+
+        if ($validated['parent_id'] ?? null) {
             $parent = Page::findOrFail($validated['parent_id']);
             if ($parent->mod_id !== $mod->id || $parent->id === $page->id) {
                 abort(422, 'Invalid parent page.');
             }
+        }
+
+        if (($validated['kind'] ?? $page->kind) === Page::KIND_CATEGORY) {
+            $validated['is_index'] = false;
         }
 
         if ($validated['title'] !== $page->title) {
@@ -465,11 +487,13 @@ class PageController extends Controller
                     'id' => $navPage->id,
                     'title' => $navPage->title,
                     'slug' => $navPage->slug,
+                    'kind' => $navPage->kind,
                     'children' => $navPage->children->map(function ($child) {
                         return [
                             'id' => $child->id,
                             'title' => $child->title,
                             'slug' => $child->slug,
+                            'kind' => $child->kind,
                         ];
                     })->toArray(),
                 ];
@@ -481,6 +505,7 @@ class PageController extends Controller
                 'id' => $page->id,
                 'title' => $page->title,
                 'slug' => $page->slug,
+                'kind' => $page->kind,
                 'content' => $page->content,
                 'published' => $page->published,
                 'updated_at' => $page->updated_at,
@@ -489,6 +514,7 @@ class PageController extends Controller
                         'id' => $child->id,
                         'title' => $child->title,
                         'slug' => $child->slug,
+                        'kind' => $child->kind,
                         'content' => substr($child->content ?? '', 0, 200),
                     ];
                 })->toArray(),

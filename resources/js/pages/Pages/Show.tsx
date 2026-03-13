@@ -27,6 +27,7 @@ interface Page {
   id: string;
   title: string;
   slug: string;
+  kind: 'page' | 'category';
   content: string;
   published: boolean;
   created_at: string;
@@ -45,6 +46,7 @@ interface NavigationPage {
   id: string;
   title: string;
   slug: string;
+  kind: 'page' | 'category';
   published: boolean;
   children?: NavigationPage[];
 }
@@ -76,6 +78,11 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
             >
               {navPage.title}
             </a>
+            {navPage.kind === 'category' && (
+              <Badge variant="secondary" className="text-xs">
+                Category
+              </Badge>
+            )}
             {navPage.published === false && (
               <span className="flex items-center gap-0.5 bg-transparent text-xs text-yellow-400">
                 <HammerIcon className="mr-1 h-3 w-3" />
@@ -163,6 +170,11 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
                 <h1 className="mb-2 text-3xl font-bold text-primary">
                   {page.title}
                 </h1>
+                {page.kind === 'category' && (
+                  <Badge variant="secondary" className="mb-2">
+                    Category
+                  </Badge>
+                )}
                 <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                   <span>By {page.creator.name}</span>
                   <span>•</span>
@@ -211,9 +223,15 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
             {/* Page Content */}
             <Card>
               <CardContent className="pt-6">
-                <MarkdownRenderer
-                  content={page.content || 'This page is empty.'}
-                />
+                {page.kind === 'category' && !page.content ? (
+                  <p className="text-muted-foreground">
+                    This category groups related pages.
+                  </p>
+                ) : (
+                  <MarkdownRenderer
+                    content={page.content || 'This page is empty.'}
+                  />
+                )}
               </CardContent>
             </Card>
 
@@ -223,7 +241,7 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <BookOpenIcon className="mr-2 h-5 w-5" />
-                    Subpages
+                    Child Pages
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -261,6 +279,16 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
                     >
                       <PencilIcon className="mr-2 h-4 w-4" />
                       Improve this Page
+                    </a>
+                  </Button>
+                )}
+                {canEdit && !isGithubManaged && page.kind === 'category' && (
+                  <Button size="sm" asChild>
+                    <a
+                      href={`/dashboard/mods/${mod.slug}/pages/create?parent_id=${page.id}`}
+                    >
+                      <PlusIcon className="mr-2 h-4 w-4" />
+                      Add Child Page
                     </a>
                   </Button>
                 )}

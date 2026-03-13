@@ -12,11 +12,16 @@ class Page extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
 
+    public const KIND_PAGE = 'page';
+
+    public const KIND_CATEGORY = 'category';
+
     protected $fillable = [
         'mod_id',
         'parent_id',
         'title',
         'slug',
+        'kind',
         'source_type',
         'source_path',
         'source_sha',
@@ -32,6 +37,7 @@ class Page extends Model
         'id' => 'string',
         'mod_id' => 'string',
         'parent_id' => 'string',
+        'kind' => 'string',
         'is_index' => 'boolean',
         'published' => 'boolean',
         'order_index' => 'integer',
@@ -42,6 +48,10 @@ class Page extends Model
         parent::boot();
 
         static::creating(function ($page) {
+            if (empty($page->kind)) {
+                $page->kind = self::KIND_PAGE;
+            }
+
             if (empty($page->slug)) {
                 $page->slug = Str::slug($page->title);
             }
@@ -188,6 +198,27 @@ class Page extends Model
     public function scopeRoot($query)
     {
         return $query->whereNull('parent_id');
+    }
+
+    /**
+     * Scope to get category nodes only.
+     */
+    public function scopeCategories($query)
+    {
+        return $query->where('kind', self::KIND_CATEGORY);
+    }
+
+    /**
+     * Scope to get content pages only.
+     */
+    public function scopeContentPages($query)
+    {
+        return $query->where('kind', self::KIND_PAGE);
+    }
+
+    public function isCategory(): bool
+    {
+        return $this->kind === self::KIND_CATEGORY;
     }
 
     /**

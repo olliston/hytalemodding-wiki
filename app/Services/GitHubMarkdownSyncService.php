@@ -79,6 +79,7 @@ class GitHubMarkdownSyncService
                 $page->source_type = 'github';
                 $page->source_path = $sourcePath;
                 $page->source_sha = $file['sha'];
+                $page->kind = Page::KIND_PAGE;
                 $page->title = $this->resolveTitle($sourcePath, $metadata);
                 $page->content = $parsedContent['content'];
                 $page->published = $this->resolvePublished($metadata);

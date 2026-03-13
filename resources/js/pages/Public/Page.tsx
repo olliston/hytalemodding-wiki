@@ -22,6 +22,7 @@ interface Page {
   id: string;
   title: string;
   slug: string;
+  kind: 'page' | 'category';
   content: string;
   published: boolean;
   updated_at: string;
@@ -32,6 +33,7 @@ interface NavigationPage {
   id: string;
   title: string;
   slug: string;
+  kind: 'page' | 'category';
   children?: NavigationPage[];
 }
 
@@ -63,17 +65,24 @@ export default function PublicPage({ mod, page, navigation }: Props) {
   const renderNavigation = (pages: NavigationPage[], level = 0) => {
     return pages.map((navPage) => (
       <div key={navPage.id} className={`ml-${level * 3}`}>
-        <a
-          href={`/mod/${mod.slug}/${navPage.slug}`}
-          className={`group flex items-center rounded-md px-3 py-2 text-sm transition-colors ${
-            navPage.id === page.id
-              ? 'bg-accent font-medium text-accent-foreground'
-              : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
-          }`}
-        >
-          <BookOpenIcon className="mr-2 h-4 w-4 shrink-0" />
-          <span className="truncate">{navPage.title}</span>
-        </a>
+        {navPage.kind === 'category' ? (
+          <div className="flex items-center rounded-md px-3 py-2 text-sm text-muted-foreground">
+            <BookOpenIcon className="mr-2 h-4 w-4 shrink-0" />
+            <span className="truncate">{navPage.title}</span>
+          </div>
+        ) : (
+          <a
+            href={`/mod/${mod.slug}/${navPage.slug}`}
+            className={`group flex items-center rounded-md px-3 py-2 text-sm transition-colors ${
+              navPage.id === page.id
+                ? 'bg-accent font-medium text-accent-foreground'
+                : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+            }`}
+          >
+            <BookOpenIcon className="mr-2 h-4 w-4 shrink-0" />
+            <span className="truncate">{navPage.title}</span>
+          </a>
+        )}
         {navPage.children && navPage.children.length > 0 && (
           <div className="mt-1 ml-3 border-l border-border/50 pl-3">
             {renderNavigation(navPage.children, level + 1)}
@@ -95,7 +104,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
     return result;
   };
 
-  const allPages = flattenPages(navigation);
+  const allPages = flattenPages(navigation).filter((p) => p.kind !== 'category');
   const currentIndex = allPages.findIndex((p) => p.id === page.id);
   const prevPage = currentIndex > 0 ? allPages[currentIndex - 1] : null;
   const nextPage =
@@ -181,7 +190,11 @@ export default function PublicPage({ mod, page, navigation }: Props) {
             <CardContent className="p-8">
               <div className="prose max-w-none prose-gray dark:prose-invert">
                 <MarkdownRenderer
-                  content={page.content || 'This page is empty.'}
+                  content={
+                    page.kind === 'category' && !page.content
+                      ? 'This category groups related pages.'
+                      : page.content || 'This page is empty.'
+                  }
                 />
               </div>
             </CardContent>
@@ -252,7 +265,9 @@ export default function PublicPage({ mod, page, navigation }: Props) {
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-2">
-                  {page.children.map((child) => (
+                  {page.children
+                    .filter((child) => child.kind !== 'category')
+                    .map((child) => (
                     <Card
                       key={child.id}
                       className="transition-shadow hover:shadow-md"

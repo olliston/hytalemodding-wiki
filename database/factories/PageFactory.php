@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Mod;
+use App\Models\Page;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -28,6 +29,7 @@ class PageFactory extends Factory
             'parent_id' => null,
             'title' => $title,
             'slug' => Str::slug($title),
+            'kind' => Page::KIND_PAGE,
             'content' => $content,
             'order_index' => fake()->numberBetween(0, 100),
             'is_index' => false,
@@ -127,6 +129,18 @@ class PageFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'published' => false,
+        ]);
+    }
+
+    /**
+     * Indicate that the record should be a category node.
+     */
+    public function category(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'kind' => Page::KIND_CATEGORY,
+            'content' => '',
+            'is_index' => false,
         ]);
     }
 }

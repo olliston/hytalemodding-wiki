@@ -28,10 +28,13 @@ interface Page {
   slug: string;
 }
 
+type PageKind = 'page' | 'category';
+
 interface Props {
   mod: Mod;
   parent?: Page;
   potentialParents?: Page[];
+  initialKind?: PageKind;
 }
 
 // Constants
@@ -41,10 +44,12 @@ export default function CreatePage({
   mod,
   parent,
   potentialParents = [],
+  initialKind = 'page',
 }: Props) {
   // Form state management
   const { data, setData, post, processing, errors } = useForm({
     title: '',
+    kind: initialKind,
     content: '',
     parent_id: parent?.id || '',
     is_index: false,
@@ -96,7 +101,7 @@ export default function CreatePage({
 
           <h1 className="text-3xl font-bold text-primary">Create New Page</h1>
           <p className="mt-2 text-muted-foreground">
-            Add a new documentation page to your mod
+            Create a documentation page or category for your mod
           </p>
         </header>
 
@@ -110,8 +115,8 @@ export default function CreatePage({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 px-6 py-5">
-              {/* Title and Parent Fields */}
-              <div className="grid gap-6 md:grid-cols-2">
+              {/* Title, Kind and Parent Fields */}
+              <div className="grid gap-6 md:grid-cols-3">
                 {/* Title Input */}
                 <div>
                   <Label htmlFor="title">Page Title *</Label>
@@ -127,6 +132,30 @@ export default function CreatePage({
                     <p className="mt-1 text-sm text-destructive">
                       {errors.title}
                     </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="kind">Type</Label>
+                  <Select
+                    value={data.kind}
+                    onValueChange={(value: PageKind) => {
+                      setData('kind', value);
+                      if (value === 'category') {
+                        setData('is_index', false);
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="page">Page</SelectItem>
+                      <SelectItem value="category">Category</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.kind && (
+                    <p className="mt-1 text-sm text-destructive">{errors.kind}</p>
                   )}
                 </div>
 
@@ -162,6 +191,7 @@ export default function CreatePage({
                   <Checkbox
                     id="is_index"
                     checked={data.is_index}
+                    disabled={data.kind === 'category'}
                     onCheckedChange={(checked) =>
                       setData('is_index', !!checked)
                     }
@@ -187,14 +217,20 @@ export default function CreatePage({
             </CardContent>
           </Card>
 
-          {/* Content Editor & Preview Section */}
-          {/* Content Editor & Preview Section */}
-          <MarkdownEditorPreview
-            content={data.content}
-            onContentChange={(content) => setData('content', content)}
-            lineCount={lineCount}
-            error={errors.content}
-          />
+          {data.kind === 'page' ? (
+            <MarkdownEditorPreview
+              content={data.content}
+              onContentChange={(content) => setData('content', content)}
+              lineCount={lineCount}
+              error={errors.content}
+            />
+          ) : (
+            <Card className="border-border/40 bg-card/50">
+              <CardContent className="px-6 py-5 text-sm text-muted-foreground">
+                Categories are used to group child pages. You can create pages inside this category after saving it.
+              </CardContent>
+            </Card>
+          )}
 
           {/*  Form Actions  */}
           <div className="flex items-center justify-between pt-4">
@@ -214,7 +250,11 @@ export default function CreatePage({
                 {processing ? 'Saving...' : 'Save as Draft'}
               </Button>
               <Button type="submit" disabled={processing}>
-                {processing ? 'Publishing...' : 'Publish Page'}
+                {processing
+                  ? 'Publishing...'
+                  : data.kind === 'category'
+                    ? 'Create Category'
+                    : 'Publish Page'}
               </Button>
             </div>
           </div>

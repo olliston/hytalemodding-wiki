@@ -30,6 +30,7 @@ interface Page {
   id: string;
   title: string;
   slug: string;
+  kind: 'page' | 'category';
   content: string;
   is_index: boolean;
   published: boolean;
@@ -54,6 +55,7 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
   // Form state management
   const { data, setData, patch, processing, errors } = useForm({
     title: page.title,
+    kind: page.kind,
     content: page.content,
     parent_id: page.parent_id || '',
     is_index: page.is_index,
@@ -113,7 +115,7 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
 
           <h1 className="text-3xl font-bold text-primary">Edit Page</h1>
           <p className="mt-2 text-muted-foreground">
-            Update your documentation page content and settings
+            Update your page or category settings
           </p>
         </header>
 
@@ -127,8 +129,8 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 px-6 py-5">
-              {/* Title and Parent Fields */}
-              <div className="grid gap-6 md:grid-cols-2">
+              {/* Title, Type and Parent Fields */}
+              <div className="grid gap-6 md:grid-cols-3">
                 {/* Title Input */}
                 <div>
                   <Label htmlFor="title">Page Title *</Label>
@@ -144,6 +146,30 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
                     <p className="mt-1 text-sm text-destructive">
                       {errors.title}
                     </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="kind">Type</Label>
+                  <Select
+                    value={data.kind}
+                    onValueChange={(value: 'page' | 'category') => {
+                      setData('kind', value);
+                      if (value === 'category') {
+                        setData('is_index', false);
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="page">Page</SelectItem>
+                      <SelectItem value="category">Category</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.kind && (
+                    <p className="mt-1 text-sm text-destructive">{errors.kind}</p>
                   )}
                 </div>
 
@@ -179,6 +205,7 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
                   <Checkbox
                     id="is_index"
                     checked={data.is_index}
+                    disabled={data.kind === 'category'}
                     onCheckedChange={(checked) =>
                       setData('is_index', !!checked)
                     }
@@ -204,12 +231,20 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
             </CardContent>
           </Card>
 
-          <MarkdownEditorPreview
-            content={data.content}
-            onContentChange={(content) => setData('content', content)}
-            lineCount={lineCount}
-            error={errors.content}
-          />
+          {data.kind === 'page' ? (
+            <MarkdownEditorPreview
+              content={data.content}
+              onContentChange={(content) => setData('content', content)}
+              lineCount={lineCount}
+              error={errors.content}
+            />
+          ) : (
+            <Card className="border-border/40 bg-card/50">
+              <CardContent className="px-6 py-5 text-sm text-muted-foreground">
+                Categories group child pages and do not require page body content.
+              </CardContent>
+            </Card>
+          )}
 
           {/* Form Actions */}
           <div className="flex items-center justify-between pt-4">

@@ -28,6 +28,7 @@ interface Page {
   id: string;
   title: string;
   slug: string;
+  kind: 'page' | 'category';
   content?: string;
   published: boolean;
   created_at: string;
@@ -191,7 +192,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
               {/* Page type indicator */}
               <div
                 className={`mr-2 h-2 w-2 shrink-0 rounded-full ${
-                  page.children && page.children.length > 0
+                  page.kind === 'category'
                     ? 'bg-blue-500'
                     : 'bg-gray-400'
                 }`}
@@ -211,6 +212,11 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
                   >
                     <HammerIcon className="mr-1 h-3 w-3" />
                     Draft
+                  </Badge>
+                )}
+                {page.kind === 'category' && (
+                  <Badge variant="secondary" className="ml-2 text-xs">
+                    Category
                   </Badge>
                 )}
                 {page.children && page.children.length > 0 && (
@@ -375,6 +381,14 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
                   <a href={`/dashboard/mods/${mod.slug}/pages/create`}>
                     <PlusIcon className="mr-2 h-4 w-4" />
                     New Page
+                  </a>
+                </Button>
+              )}
+              {canEdit && !isGithubManaged && (
+                <Button variant="outline" asChild>
+                  <a href={`/dashboard/mods/${mod.slug}/pages/create?kind=category`}>
+                    <PlusIcon className="mr-2 h-4 w-4" />
+                    New Category
                   </a>
                 </Button>
               )}
