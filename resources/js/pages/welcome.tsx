@@ -146,7 +146,7 @@ export default function Welcome({
                   Built for release-ready docs
                 </p>
                 <h2 className="max-w-lg text-2xl font-semibold tracking-tight md:text-3xl">
-                  Turn scattered notes into clear documentation your players can
+                  Turn scattered notes into clear docs your players can
                   trust
                 </h2>
                 <p className="max-w-xl text-muted-foreground">
