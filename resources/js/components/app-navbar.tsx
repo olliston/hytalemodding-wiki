@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Menu, Search, Settings, Github, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,8 @@ import {
 } from '@/components/ui/sheet';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn } from '@/lib/utils';
-import { dashboard } from '@/routes';
+import { dashboard, login, register } from '@/routes';
+import type { SharedData } from '@/types';
 import { mainNavItems } from '@/utils/commonUtils';
 import HytaleModdingLogo from './hytale-modding-logo';
 import { UserMenuContent } from './user-menu-content';
@@ -30,6 +31,7 @@ export default function AppNavbar({
   brandHref = dashboard().url,
 }: AppNavbarProps) {
   const { isCurrentUrl } = useCurrentUrl();
+  const { auth } = usePage<SharedData>().props;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
@@ -71,8 +73,19 @@ export default function AppNavbar({
           </NavigationMenu>
         </div>
 
-        <div className="ml-8 flex items-center space-x-4">
-          <UserMenuContent />
+        <div className="ml-8 flex items-center gap-2 md:gap-4">
+          {auth.user ? (
+            <UserMenuContent />
+          ) : (
+            <>
+              <Button asChild variant="ghost" size="sm">
+                <Link href={login()}>Log In</Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link href={register()}>Register</Link>
+              </Button>
+            </>
+          )}
 
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
@@ -123,20 +136,44 @@ export default function AppNavbar({
 
                 <div className="border-t pt-6">
                   <div className="flex flex-col space-y-2">
-                    <Button
-                      asChild
-                      variant="ghost"
-                      size="sm"
-                      className="justify-start"
-                    >
-                      <Link
-                        href="/settings/profile"
-                        onClick={() => setIsMobileMenuOpen(false)}
+                    {auth.user ? (
+                      <Button
+                        asChild
+                        variant="ghost"
+                        size="sm"
+                        className="justify-start"
                       >
-                        <Settings className="mr-2 h-4 w-4" />
-                        Settings
-                      </Link>
-                    </Button>
+                        <Link
+                          href="/settings/profile"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <Settings className="mr-2 h-4 w-4" />
+                          Settings
+                        </Link>
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="sm"
+                          className="justify-start"
+                        >
+                          <Link href={login()} onClick={() => setIsMobileMenuOpen(false)}>
+                            Log In
+                          </Link>
+                        </Button>
+                        <Button
+                          asChild
+                          size="sm"
+                          className="justify-start"
+                        >
+                          <Link href={register()} onClick={() => setIsMobileMenuOpen(false)}>
+                            Register
+                          </Link>
+                        </Button>
+                      </>
+                    )}
                     <Button
                       asChild
                       variant="ghost"

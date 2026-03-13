@@ -74,7 +74,6 @@ export default function PublicMods({ mods, query }: Props) {
         <AppNavbar brandHref="/" />
 
         <main className="mx-auto w-full max-w-7xl flex-1 px-6 py-10 md:px-8 md:py-14">
-          {/* Header */}
           <div className="mb-10 space-y-4">
             <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
               Browse Mods
@@ -83,7 +82,6 @@ export default function PublicMods({ mods, query }: Props) {
               Explore publicly available Hytale mod wikis from the community.
             </p>
 
-            {/* Search */}
             <form onSubmit={handleSearch} className="flex max-w-md gap-2">
               <div className="relative flex-1">
                 <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -101,7 +99,6 @@ export default function PublicMods({ mods, query }: Props) {
             </form>
           </div>
 
-          {/* Results count */}
           {query && (
             <p className="mb-6 text-sm text-muted-foreground">
               {mods.total} result{mods.total !== 1 ? 's' : ''} for &ldquo;
@@ -109,7 +106,6 @@ export default function PublicMods({ mods, query }: Props) {
             </p>
           )}
 
-          {/* Mods grid */}
           {mods.data.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-center">
               <BookOpenIcon className="mb-4 h-14 w-14 text-muted-foreground/50" />
@@ -170,7 +166,6 @@ function ModCard({ mod }: { mod: Mod }) {
       href={`/mod/${mod.slug}`}
       className="group flex flex-col overflow-hidden rounded-xl border border-border/60 bg-card transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5"
     >
-      {/* Icon / banner area */}
       <div className="flex items-center gap-3 border-b border-border/50 px-4 py-3">
         {mod.icon_url ? (
           <Avatar className="h-9 w-9 rounded-md">
@@ -198,7 +193,6 @@ function ModCard({ mod }: { mod: Mod }) {
         </div>
       </div>
 
-      {/* Body */}
       <div className="flex flex-1 flex-col px-4 py-3">
         <p className="line-clamp-2 flex-1 text-sm text-muted-foreground">
           {mod.description ?? 'No description provided.'}
