@@ -20,6 +20,8 @@ class Mod extends Model
         'visibility',
         'storage_driver',
         'external_access',
+        'github_repository_url',
+        'github_repository_path',
     ];
 
     protected $casts = [

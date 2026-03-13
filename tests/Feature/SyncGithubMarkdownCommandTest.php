@@ -1,0 +1,181 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Mod;
+use App\Models\Page;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
+use Tests\TestCase;
+
+class SyncGithubMarkdownCommandTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_it_syncs_markdown_files_from_github_into_pages(): void
+    {
+        $owner = User::factory()->create();
+
+        $mod = Mod::factory()->create([
+            'owner_id' => $owner->id,
+            'name' => 'Docs Mod',
+            'slug' => 'docs-mod',
+            'github_repository_url' => 'https://github.com/acme/docs-repo',
+            'github_repository_path' => '/docs/',
+        ]);
+
+        Http::fake([
+            'https://api.github.com/repos/acme/docs-repo' => Http::response([
+                'default_branch' => 'main',
+            ], 200),
+            'https://api.github.com/repos/acme/docs-repo/contents/docs?ref=main' => Http::response([
+                [
+                    'type' => 'file',
+                    'name' => 'README.md',
+                    'path' => 'docs/README.md',
+                    'sha' => 'sha-root-readme',
+                    'download_url' => 'https://raw.githubusercontent.com/acme/docs-repo/main/docs/README.md',
+                ],
+                [
+                    'type' => 'file',
+                    'name' => 'getting-started.md',
+                    'path' => 'docs/getting-started.md',
+                    'sha' => 'sha-getting-started',
+                    'download_url' => 'https://raw.githubusercontent.com/acme/docs-repo/main/docs/getting-started.md',
+                ],
+                [
+                    'type' => 'dir',
+                    'name' => 'guide',
+                    'path' => 'docs/guide',
+                ],
+            ], 200),
+            'https://api.github.com/repos/acme/docs-repo/contents/docs/guide?ref=main' => Http::response([
+                [
+                    'type' => 'file',
+                    'name' => 'README.md',
+                    'path' => 'docs/guide/README.md',
+                    'sha' => 'sha-guide-readme',
+                    'download_url' => 'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/README.md',
+                ],
+                [
+                    'type' => 'file',
+                    'name' => 'install.md',
+                    'path' => 'docs/guide/install.md',
+                    'sha' => 'sha-install',
+                    'download_url' => 'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/install.md',
+                ],
+                [
+                    'type' => 'file',
+                    'name' => 'notes.txt',
+                    'path' => 'docs/guide/notes.txt',
+                    'sha' => 'sha-notes',
+                    'download_url' => 'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/notes.txt',
+                ],
+            ], 200),
+            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/README.md' => Http::response("# Welcome\n\nRoot docs", 200),
+            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/getting-started.md' => Http::response("# Getting Started", 200),
+            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/README.md' => Http::response("# Guide", 200),
+            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/install.md' => Http::response("# Install", 200),
+        ]);
+
+        $this->artisan('mods:sync-github-markdown')->assertSuccessful();
+
+        $this->assertDatabaseCount('pages', 4);
+        $this->assertDatabaseHas('pages', [
+            'mod_id' => $mod->id,
+            'source_type' => 'github',
+            'source_path' => 'README.md',
+            'is_index' => true,
+            'title' => 'Home',
+        ]);
+
+        $guideReadme = Page::where('mod_id', $mod->id)
+            ->where('source_path', 'guide/README.md')
+            ->firstOrFail();
+
+        $installPage = Page::where('mod_id', $mod->id)
+            ->where('source_path', 'guide/install.md')
+            ->firstOrFail();
+
+        $this->assertSame($guideReadme->id, $installPage->parent_id);
+    }
+
+    public function test_it_updates_existing_synced_pages_without_creating_duplicates(): void
+    {
+        $owner = User::factory()->create();
+
+        $mod = Mod::factory()->create([
+            'owner_id' => $owner->id,
+            'name' => 'Docs Mod',
+            'slug' => 'docs-mod',
+            'github_repository_url' => 'https://github.com/acme/docs-repo',
+            'github_repository_path' => '/docs/',
+        ]);
+
+        $this->fakeRepoContents('# Install v1', 'sha-install-v1');
+        $this->artisan('mods:sync-github-markdown')->assertSuccessful();
+
+        $this->fakeRepoContents('# Install v2', 'sha-install-v2');
+        $this->artisan('mods:sync-github-markdown')->assertSuccessful();
+
+        $this->assertDatabaseCount('pages', 4);
+        $this->assertDatabaseHas('pages', [
+            'mod_id' => $mod->id,
+            'source_path' => 'guide/install.md',
+        ]);
+    }
+
+    private function fakeRepoContents(string $installContent, string $installSha = 'sha-install'): void
+    {
+        $rootListing = [
+            [
+                'type' => 'file',
+                'name' => 'README.md',
+                'path' => 'docs/README.md',
+                'sha' => 'sha-root-readme',
+                'download_url' => 'https://raw.githubusercontent.com/acme/docs-repo/main/docs/README.md',
+            ],
+            [
+                'type' => 'file',
+                'name' => 'getting-started.md',
+                'path' => 'docs/getting-started.md',
+                'sha' => 'sha-getting-started',
+                'download_url' => 'https://raw.githubusercontent.com/acme/docs-repo/main/docs/getting-started.md',
+            ],
+            [
+                'type' => 'dir',
+                'name' => 'guide',
+                'path' => 'docs/guide',
+            ],
+        ];
+
+        Http::fake([
+            'https://api.github.com/repos/acme/docs-repo' => Http::response([
+                'default_branch' => 'main',
+            ], 200),
+            'https://api.github.com/repos/acme/docs-repo/contents/docs?ref=main' => Http::response($rootListing, 200),
+            'https://api.github.com/repos/acme/docs-repo/contents/docs/guide?ref=main' => Http::response([
+                [
+                    'type' => 'file',
+                    'name' => 'README.md',
+                    'path' => 'docs/guide/README.md',
+                    'sha' => 'sha-guide-readme',
+                    'download_url' => 'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/README.md',
+                ],
+                [
+                    'type' => 'file',
+                    'name' => 'install.md',
+                    'path' => 'docs/guide/install.md',
+                    'sha' => $installSha,
+                    'download_url' => 'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/install.md',
+                ],
+            ], 200),
+            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/README.md' => Http::response("# Welcome\n\nRoot docs", 200),
+            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/getting-started.md' => Http::response("# Getting Started", 200),
+            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/README.md' => Http::response("# Guide", 200),
+            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/install.md' => Http::response($installContent, 200),
+        ]);
+    }
+}
+
