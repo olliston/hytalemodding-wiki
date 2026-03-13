@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('mods', function (Blueprint $table) {
             $table->string('github_repository_url')->nullable()->after('external_access');
-            $table->string('github_repository_path')->nullable()->after('github_repository_url');
+            $table->string('github_repository_path')->nullable()->after('github_repository_url')->default('/docs/');
         });
     }
 
@@ -28,4 +28,3 @@ return new class extends Migration
         });
     }
 };
-

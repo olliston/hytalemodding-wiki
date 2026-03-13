@@ -9,6 +9,7 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react';
+import AppFooter from '@/components/app-footer';
 import HytaleModdingLogo from '@/components/hytale-modding-logo';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,7 +23,6 @@ import { UserMenuContent } from '@/components/user-menu-content';
 import { dashboard, home, login, register } from '@/routes';
 import mods from '@/routes/mods';
 import type { SharedData } from '@/types';
-import AppFooter from '@/components/app-footer';
 
 const featureCards: Array<{
   title: string;
@@ -66,7 +66,8 @@ const workflowSteps: Array<{
   },
   {
     title: 'Publish with confidence',
-    description: 'Share polished docs that are easy for your community to navigate.',
+    description:
+      'Share polished docs that are easy for your community to navigate.',
     icon: ShieldCheck,
   },
 ];
@@ -166,7 +167,10 @@ export default function Welcome({
 
           <section className="grid gap-4 md:grid-cols-3">
             {featureCards.map(({ title, description, icon: Icon }) => (
-              <Card key={title} className="border-border/60 bg-card/70 backdrop-blur">
+              <Card
+                key={title}
+                className="border-border/60 bg-card/70 backdrop-blur"
+              >
                 <CardHeader className="space-y-3">
                   <div className="w-fit rounded-md bg-primary/10 p-2 text-primary">
                     <Icon className="h-5 w-5" />
@@ -190,7 +194,9 @@ export default function Welcome({
                       Step {index + 1}
                     </p>
                     <h2 className="font-semibold">{title}</h2>
-                    <p className="text-sm text-muted-foreground">{description}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {description}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -204,8 +210,8 @@ export default function Welcome({
                   Ready to build your wiki?
                 </h2>
                 <p className="text-muted-foreground">
-                  Start a mod workspace, add your first pages, and share a single
-                  source of truth with your contributors and players.
+                  Start a mod workspace, add your first pages, and share a
+                  single source of truth with your contributors and players.
                 </p>
               </div>
 
@@ -228,7 +234,7 @@ export default function Welcome({
           </section>
         </div>
       </div>
-    <AppFooter />
+      <AppFooter />
     </>
   );
 }
