@@ -214,7 +214,8 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
                 )}
                 {canEdit && isGithubManaged && (
                   <p className="text-sm text-muted-foreground">
-                    This page is synced from GitHub and cannot be edited manually.
+                    This page is synced from GitHub and cannot be edited
+                    manually.
                   </p>
                 )}
               </div>

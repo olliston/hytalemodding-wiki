@@ -329,7 +329,13 @@ export default function ShowMod({ mod, userRole, canEdit, canManage }: Props) {
   );
 }
 
-function QuickActions({ mod, isGithubManaged }: { mod: Mod; isGithubManaged: boolean }) {
+function QuickActions({
+  mod,
+  isGithubManaged,
+}: {
+  mod: Mod;
+  isGithubManaged: boolean;
+}) {
   return (
     <div className="flex flex-col gap-4">
       <div>

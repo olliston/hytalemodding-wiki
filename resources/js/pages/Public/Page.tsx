@@ -104,7 +104,9 @@ export default function PublicPage({ mod, page, navigation }: Props) {
     return result;
   };
 
-  const allPages = flattenPages(navigation).filter((p) => p.kind !== 'category');
+  const allPages = flattenPages(navigation).filter(
+    (p) => p.kind !== 'category',
+  );
   const currentIndex = allPages.findIndex((p) => p.id === page.id);
   const prevPage = currentIndex > 0 ? allPages[currentIndex - 1] : null;
   const nextPage =
@@ -268,25 +270,25 @@ export default function PublicPage({ mod, page, navigation }: Props) {
                   {page.children
                     .filter((child) => child.kind !== 'category')
                     .map((child) => (
-                    <Card
-                      key={child.id}
-                      className="transition-shadow hover:shadow-md"
-                    >
-                      <CardContent className="p-4">
-                        <a
-                          href={`/mod/${mod.slug}/${child.slug}`}
-                          className="group block"
-                        >
-                          <h4 className="mb-2 font-medium text-foreground group-hover:text-primary">
-                            {child.title}
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            {getMarkdownPreview(child.content || '', 120)}
-                          </p>
-                        </a>
-                      </CardContent>
-                    </Card>
-                  ))}
+                      <Card
+                        key={child.id}
+                        className="transition-shadow hover:shadow-md"
+                      >
+                        <CardContent className="p-4">
+                          <a
+                            href={`/mod/${mod.slug}/${child.slug}`}
+                            className="group block"
+                          >
+                            <h4 className="mb-2 font-medium text-foreground group-hover:text-primary">
+                              {child.title}
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              {getMarkdownPreview(child.content || '', 120)}
+                            </p>
+                          </a>
+                        </CardContent>
+                      </Card>
+                    ))}
                 </div>
               </CardContent>
             </Card>

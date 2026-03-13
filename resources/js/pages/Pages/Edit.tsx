@@ -169,7 +169,9 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
                     </SelectContent>
                   </Select>
                   {errors.kind && (
-                    <p className="mt-1 text-sm text-destructive">{errors.kind}</p>
+                    <p className="mt-1 text-sm text-destructive">
+                      {errors.kind}
+                    </p>
                   )}
                 </div>
 
@@ -241,7 +243,8 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
           ) : (
             <Card className="border-border/40 bg-card/50">
               <CardContent className="px-6 py-5 text-sm text-muted-foreground">
-                Categories group child pages and do not require page body content.
+                Categories group child pages and do not require page body
+                content.
               </CardContent>
             </Card>
           )}

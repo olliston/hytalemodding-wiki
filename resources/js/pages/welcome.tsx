@@ -15,7 +15,6 @@ import mods from '@/routes/mods';
 import publicRoutes from '@/routes/public';
 import type { SharedData } from '@/types';
 
-
 const workflowSteps: Array<{
   title: string;
   description: string;
@@ -104,8 +103,8 @@ export default function Welcome({
                 Your home for Hytale mod documentation
               </h1>
               <p className="max-w-2xl text-lg text-muted-foreground md:text-xl">
-                Create mod wikis, ship clearer guides, and keep your whole
-                team aligned in one focused workspace.
+                Create mod wikis, ship clearer guides, and keep your whole team
+                aligned in one focused workspace.
               </p>
             </div>
 
@@ -146,8 +145,7 @@ export default function Welcome({
                   Built for release-ready docs
                 </p>
                 <h2 className="max-w-lg text-2xl font-semibold tracking-tight md:text-3xl">
-                  Turn scattered notes into clear docs your players can
-                  trust
+                  Turn scattered notes into clear docs your players can trust
                 </h2>
                 <p className="max-w-xl text-muted-foreground">
                   Organize setup, systems, changelogs, and contributor context

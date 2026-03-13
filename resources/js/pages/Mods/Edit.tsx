@@ -287,7 +287,9 @@ export default function EditMod({ mod }: Props) {
                         }
                         placeholder="https://github.com/owner/repository"
                         className={cn(
-                          errors.github_repository_url ? 'border-destructive' : '',
+                          errors.github_repository_url
+                            ? 'border-destructive'
+                            : '',
                         )}
                       />
                       {errors.github_repository_url && (
@@ -310,7 +312,9 @@ export default function EditMod({ mod }: Props) {
                         }
                         placeholder="docs"
                         className={cn(
-                          errors.github_repository_path ? 'border-destructive' : '',
+                          errors.github_repository_path
+                            ? 'border-destructive'
+                            : '',
                         )}
                       />
                       {errors.github_repository_path && (

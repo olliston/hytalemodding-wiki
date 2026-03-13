@@ -155,7 +155,9 @@ export default function CreatePage({
                     </SelectContent>
                   </Select>
                   {errors.kind && (
-                    <p className="mt-1 text-sm text-destructive">{errors.kind}</p>
+                    <p className="mt-1 text-sm text-destructive">
+                      {errors.kind}
+                    </p>
                   )}
                 </div>
 
@@ -227,7 +229,8 @@ export default function CreatePage({
           ) : (
             <Card className="border-border/40 bg-card/50">
               <CardContent className="px-6 py-5 text-sm text-muted-foreground">
-                Categories are used to group child pages. You can create pages inside this category after saving it.
+                Categories are used to group child pages. You can create pages
+                inside this category after saving it.
               </CardContent>
             </Card>
           )}

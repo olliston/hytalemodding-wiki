@@ -60,7 +60,10 @@ export default function PublicMods({ mods, query }: Props) {
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    router.get('/mods', search ? { q: search } : {}, { preserveState: true, replace: true });
+    router.get('/mods', search ? { q: search } : {}, {
+      preserveState: true,
+      replace: true,
+    });
   }
 
   return (
@@ -101,7 +104,8 @@ export default function PublicMods({ mods, query }: Props) {
           {/* Results count */}
           {query && (
             <p className="mb-6 text-sm text-muted-foreground">
-              {mods.total} result{mods.total !== 1 ? 's' : ''} for &ldquo;{query}&rdquo;
+              {mods.total} result{mods.total !== 1 ? 's' : ''} for &ldquo;
+              {query}&rdquo;
             </p>
           )}
 
@@ -170,7 +174,11 @@ function ModCard({ mod }: { mod: Mod }) {
       <div className="flex items-center gap-3 border-b border-border/50 px-4 py-3">
         {mod.icon_url ? (
           <Avatar className="h-9 w-9 rounded-md">
-            <AvatarImage src={mod.icon_url} alt={mod.name} className="object-cover" />
+            <AvatarImage
+              src={mod.icon_url}
+              alt={mod.name}
+              className="object-cover"
+            />
             <AvatarFallback className="rounded-md text-sm font-semibold">
               {mod.name.charAt(0).toUpperCase()}
             </AvatarFallback>
@@ -181,7 +189,7 @@ function ModCard({ mod }: { mod: Mod }) {
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold leading-tight group-hover:text-primary">
+          <p className="truncate text-sm leading-tight font-semibold group-hover:text-primary">
             {mod.name}
           </p>
           <p className="truncate text-xs text-muted-foreground">
@@ -199,7 +207,8 @@ function ModCard({ mod }: { mod: Mod }) {
         <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <BookOpenIcon className="h-3.5 w-3.5" />
-            {mod.published_pages_count} {mod.published_pages_count === 1 ? 'page' : 'pages'}
+            {mod.published_pages_count}{' '}
+            {mod.published_pages_count === 1 ? 'page' : 'pages'}
           </span>
           <span>{formatDate(mod.updated_at)}</span>
         </div>
@@ -207,4 +216,3 @@ function ModCard({ mod }: { mod: Mod }) {
     </Link>
   );
 }
-

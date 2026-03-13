@@ -10,8 +10,9 @@ export default function AppFooter() {
           <div className="col-span-1 md:col-span-2">
             <HytaleModdingLogo variant="banner" size="lg" />
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              #1 Documentation platform for Hytale Mods. Create, organize and
-              share your mod documentation with the community easily.
+              #1 Documentation platform for Hytale Mods.
+              <br /> Create, organize and share your mod documentation with the
+              community easily.
             </p>
           </div>
 

@@ -62,7 +62,12 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
   const isGithubManaged = Boolean(mod.github_repository_url);
 
   const handleDragEnd = async (result: DropResult) => {
-    if (!result.destination || !canEdit || !isDragModeEnabled || isGithubManaged) {
+    if (
+      !result.destination ||
+      !canEdit ||
+      !isDragModeEnabled ||
+      isGithubManaged
+    ) {
       return;
     }
 
@@ -138,7 +143,9 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
       key={page.id}
       draggableId={page.id}
       index={index}
-      isDragDisabled={!canEdit || isDragDisabled || !isDragModeEnabled || isGithubManaged}
+      isDragDisabled={
+        !canEdit || isDragDisabled || !isDragModeEnabled || isGithubManaged
+      }
     >
       {(provided, snapshot) => (
         <tr
@@ -192,9 +199,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
               {/* Page type indicator */}
               <div
                 className={`mr-2 h-2 w-2 shrink-0 rounded-full ${
-                  page.kind === 'category'
-                    ? 'bg-blue-500'
-                    : 'bg-gray-400'
+                  page.kind === 'category' ? 'bg-blue-500' : 'bg-gray-400'
                 }`}
               />
 
@@ -386,7 +391,9 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
               )}
               {canEdit && !isGithubManaged && (
                 <Button variant="outline" asChild>
-                  <a href={`/dashboard/mods/${mod.slug}/pages/create?kind=category`}>
+                  <a
+                    href={`/dashboard/mods/${mod.slug}/pages/create?kind=category`}
+                  >
                     <PlusIcon className="mr-2 h-4 w-4" />
                     New Category
                   </a>
@@ -445,7 +452,8 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
           <div className="space-y-4">
             {isGithubManaged && (
               <p className="text-sm text-muted-foreground">
-                This mod is GitHub-managed. Manual page creation and editing are disabled.
+                This mod is GitHub-managed. Manual page creation and editing are
+                disabled.
               </p>
             )}
             <div className="mb-6 flex items-center justify-between">
