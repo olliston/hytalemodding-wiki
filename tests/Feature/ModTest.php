@@ -6,6 +6,7 @@ use App\Models\Mod;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class ModTest extends TestCase
@@ -213,6 +214,34 @@ class ModTest extends TestCase
         $response = $this->get("/mod/{$mod->slug}");
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page->component('Public/Mod'));
+    }
+
+    public function test_public_mod_page_does_not_expose_owner_email()
+    {
+        $owner = User::factory()->create(['email' => 'owner@example.com']);
+        $mod = Mod::factory()->public()->create(['owner_id' => $owner->id]);
+
+        $response = $this->get(route('public.mod', $mod));
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page) => $page
+            ->component('Public/Mod')
+            ->missing('mod.owner.email')
+        );
+    }
+
+    public function test_public_mod_list_does_not_expose_owner_email()
+    {
+        $owner = User::factory()->create(['email' => 'owner@example.com']);
+        Mod::factory()->public()->create(['owner_id' => $owner->id]);
+
+        $response = $this->get(route('public.mods'));
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page) => $page
+            ->component('Public/Mods')
+            ->missing('mods.data.0.owner.email')
+        );
     }
 
     public function test_guest_cannot_view_private_mod_page()

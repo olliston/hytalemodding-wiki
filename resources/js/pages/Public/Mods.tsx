@@ -136,7 +136,6 @@ export default function PublicMods({ mods, query }: Props) {
             </div>
           )}
 
-          {/* Pagination */}
           {mods.last_page > 1 && (
             <div className="mt-10 flex flex-wrap items-center justify-center gap-1">
               {mods.links.map((link, i) => (

@@ -7,6 +7,7 @@ use App\Models\Page;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class PageTest extends TestCase
@@ -166,6 +167,38 @@ class PageTest extends TestCase
         $response = $this->get("/mod/{$mod->slug}/{$page->slug}");
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page->component('Public/Page'));
+    }
+
+    public function test_public_page_does_not_expose_owner_email()
+    {
+        $owner = User::factory()->create(['email' => 'owner@example.com']);
+        $mod = Mod::factory()->public()->create(['owner_id' => $owner->id]);
+        $page = Page::factory()->create(['mod_id' => $mod->id, 'published' => true]);
+
+        $response = $this->get(route('public.page', ['mod' => $mod, 'page' => $page]));
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $inertia) => $inertia
+            ->component('Public/Page')
+            ->missing('mod.owner.email')
+        );
+    }
+
+    public function test_authenticated_user_viewing_public_mod_pages_index_does_not_receive_owner_email()
+    {
+        $owner = User::factory()->create(['email' => 'owner@example.com']);
+        $viewer = User::factory()->create();
+        $mod = Mod::factory()->public()->create(['owner_id' => $owner->id]);
+
+        $this->actingAs($viewer);
+
+        $response = $this->get(route('pages.index', $mod));
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $inertia) => $inertia
+            ->component('Pages/Index')
+            ->missing('mod.owner.email')
+        );
     }
 
     public function test_guest_cannot_view_unpublished_page()

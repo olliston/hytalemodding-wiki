@@ -6,6 +6,7 @@ use App\Mail\CollaboratorInvitation;
 use App\Models\Mod;
 use App\Models\ModInvitation;
 use App\Models\User;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -129,7 +130,16 @@ class ModController extends Controller
         $userRole = $user ? $mod->getUserRole($user) : null;
 
         return Inertia::render('Mods/Show', [
-            'mod' => $mod,
+            'mod' => array_merge($mod->toArray(), [
+                'owner' => $this->serializeOwner($mod->owner),
+                'collaborators' => $mod->collaborators->map(function (User $collaborator) {
+                    return array_merge($this->serializeOwner($collaborator), [
+                        'pivot' => [
+                            'role' => $collaborator->pivot->role,
+                        ],
+                    ]);
+                })->values()->toArray(),
+            ]),
             'userRole' => $userRole,
             'canEdit' => $user && $mod->userCan($user, 'edit'),
             'canManage' => $user && $mod->userCan($user, 'manage_collaborators'),
@@ -401,6 +411,8 @@ class ModController extends Controller
             ->paginate(24)
             ->withQueryString();
 
+        $mods = $this->sanitizePublicModPaginator($mods);
+
         return Inertia::render('Public/Mods', [
             'mods' => $mods,
             'query' => $query,
@@ -432,7 +444,14 @@ class ModController extends Controller
             ->first();
 
         return Inertia::render('Public/Mod', [
-            'mod' => array_merge($mod->toArray(), [
+            'mod' => [
+                'id' => $mod->id,
+                'name' => $mod->name,
+                'slug' => $mod->slug,
+                'description' => $mod->description,
+                'icon_url' => $mod->icon_url,
+                'visibility' => $mod->visibility,
+                'owner' => $this->serializeOwner($mod->owner),
                 'root_pages' => $rootPages->map(function ($page) {
                     return [
                         'id' => $page->id,
@@ -461,8 +480,34 @@ class ModController extends Controller
                     'content' => $indexPage->content,
                     'updated_at' => $indexPage->updated_at,
                 ] : null,
-            ]),
+            ],
         ]);
+    }
+
+    private function sanitizePublicModPaginator(LengthAwarePaginator $mods): LengthAwarePaginator
+    {
+        return $mods->through(function (Mod $mod) {
+            return [
+                'id' => $mod->id,
+                'name' => $mod->name,
+                'slug' => $mod->slug,
+                'description' => $mod->description,
+                'icon_url' => $mod->icon_url,
+                'visibility' => $mod->visibility,
+                'owner' => $this->serializeOwner($mod->owner),
+                'published_pages_count' => $mod->published_pages_count,
+                'updated_at' => $mod->updated_at,
+            ];
+        });
+    }
+
+    private function serializeOwner(User $owner): array
+    {
+        return [
+            'name' => $owner->name,
+            'username' => $owner->username,
+            'avatar_url' => $owner->avatar_url,
+        ];
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Mod;
 use App\Models\Page;
+use App\Models\User;
 use App\Services\PageViewService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,7 +31,7 @@ class PageController extends Controller
             ->get();
 
         return Inertia::render('Pages/Index', [
-            'mod' => $mod->load(['owner']),
+            'mod' => $this->serializeMod($mod->load(['owner'])),
             'pages' => $pages,
             'userRole' => $user ? $mod->getUserRole($user) : null,
             'canEdit' => $user && $mod->userCan($user, 'edit'),
@@ -211,7 +212,7 @@ class PageController extends Controller
         }
 
         return Inertia::render('Pages/Show', [
-            'mod' => $mod->load(['owner']),
+            'mod' => $this->serializeMod($mod->load(['owner'])),
             'page' => array_merge($page->toArray(), [
                 'path' => $path,
                 'viewStats' => $viewStats,
@@ -500,7 +501,7 @@ class PageController extends Controller
             });
 
         return Inertia::render('Public/Page', [
-            'mod' => $mod->load(['owner']),
+            'mod' => $this->serializeMod($mod->load(['owner'])),
             'page' => [
                 'id' => $page->id,
                 'title' => $page->title,
@@ -521,5 +522,29 @@ class PageController extends Controller
             ],
             'navigation' => $navigation,
         ]);
+    }
+
+    private function serializeMod(Mod $mod): array
+    {
+        return [
+            'id' => $mod->id,
+            'name' => $mod->name,
+            'slug' => $mod->slug,
+            'description' => $mod->description,
+            'icon_url' => $mod->icon_url,
+            'visibility' => $mod->visibility,
+            'github_repository_url' => $mod->github_repository_url,
+            'owner' => $this->serializeOwner($mod->owner),
+        ];
+    }
+
+    private function serializeOwner(User $owner): array
+    {
+        return [
+            'id' => $owner->id,
+            'name' => $owner->name,
+            'username' => $owner->username,
+            'avatar_url' => $owner->avatar_url,
+        ];
     }
 }
