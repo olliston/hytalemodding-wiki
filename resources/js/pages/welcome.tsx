@@ -12,13 +12,6 @@ import {
 import AppFooter from '@/components/app-footer';
 import HytaleModdingLogo from '@/components/hytale-modding-logo';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { dashboard, home, login, register } from '@/routes';
 import mods from '@/routes/mods';
@@ -126,84 +119,150 @@ export default function Welcome({
         </div>
 
         <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-14 px-6 py-10 md:px-8 md:py-14">
-          <section className="space-y-6">
-            <div className="space-y-4 pt-4">
-              <h1 className="max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
-                Your home for Hytale mod documentation
-              </h1>
-              <p className="max-w-2xl text-lg text-muted-foreground">
-                Create mod wikis, write better guides, and collaborate with your
-                team in one clean workspace.
-              </p>
+          <section className="grid items-start gap-8 pt-4 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10">
+            <div className="space-y-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                <Sparkles className="h-3.5 w-3.5" />
+                Documentation that feels as polished as your mod
+              </div>
+
+              <div className="space-y-4">
+                <h1 className="max-w-4xl text-5xl font-semibold tracking-tight md:text-6xl">
+                  Your home for Hytale mod documentation
+                </h1>
+                <p className="max-w-2xl text-lg text-muted-foreground md:text-xl">
+                  Create mod wikis, ship clearer guides, and keep your whole
+                  team aligned in one focused workspace.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                {auth.user ? (
+                  <>
+                    <Button asChild size="lg">
+                      <Link href={dashboard()}>
+                        Go to Dashboard
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" size="lg">
+                      <Link href={mods.index()}>Browse Mods</Link>
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button asChild size="lg">
+                      <Link href={login()}>Log In</Link>
+                    </Button>
+                    {canRegister && (
+                      <Button asChild variant="outline" size="lg">
+                        <Link href={register()}>Create Account</Link>
+                      </Button>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              {auth.user ? (
-                <>
-                  <Button asChild size="lg">
-                    <Link href={dashboard()}>
-                      Go to Dashboard
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline" size="lg">
-                    <Link href={mods.index()}>Browse Mods</Link>
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button asChild size="lg">
-                    <Link href={login()}>Log In</Link>
-                  </Button>
-                  {canRegister && (
-                    <Button asChild variant="outline" size="lg">
-                      <Link href={register()}>Create Account</Link>
-                    </Button>
-                  )}
-                </>
-              )}
+            <div className="space-y-4 pt-1 lg:pt-2">
+              <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                What teams use most
+              </p>
+              <div className="h-px w-full bg-border/70" />
+              <div className="space-y-1">
+                {featureCards.map(({ title, description, icon: Icon }) => (
+                  <div key={title} className="border-b border-border/60 py-4 last:border-b-0">
+                    <div className="mb-2 flex items-center gap-3">
+                      <div className="rounded-md bg-primary/10 p-2 text-primary">
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <h2 className="text-sm font-semibold md:text-base">{title}</h2>
+                    </div>
+                    <p className="pl-11 text-sm text-muted-foreground">{description}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
 
           <section className="grid gap-4 md:grid-cols-3">
-            {featureCards.map(({ title, description, icon: Icon }) => (
-              <Card
-                key={title}
-                className="border-border/60 bg-card/70 backdrop-blur"
-              >
-                <CardHeader className="space-y-3">
-                  <div className="w-fit rounded-md bg-primary/10 p-2 text-primary">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <CardTitle className="text-lg">{title}</CardTitle>
-                  <CardDescription>{description}</CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
+            <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-linear-to-br from-primary/15 via-card to-card p-6 md:col-span-2 md:p-8">
+              <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-purple-500/20 blur-3xl transition-transform duration-300 group-hover:scale-110" />
+              <div className="relative space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">
+                  Built for release-ready docs
+                </p>
+                <h2 className="max-w-lg text-2xl font-semibold tracking-tight md:text-3xl">
+                  Turn scattered notes into a source of truth your players can trust
+                </h2>
+                <p className="max-w-xl text-muted-foreground">
+                  Organize setup, systems, changelogs, and contributor context so
+                  updates are easier to ship and easier to understand.
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-border/60 bg-card/75 p-6 backdrop-blur">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Collaboration
+              </p>
+              <h3 className="text-lg font-semibold">Fewer docs bottlenecks</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Share ownership with contributors so pages stay current as features evolve.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-border/60 bg-card/75 p-6 backdrop-blur md:col-span-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    Built-in structure
+                  </p>
+                  <h3 className="mt-1 text-lg font-semibold">
+                    Spaces for guides, APIs, and changelogs from day one
+                  </h3>
+                </div>
+                <Link
+                  href={mods.index()}
+                  className="inline-flex items-center text-sm font-medium text-primary transition-opacity hover:opacity-80"
+                >
+                  Explore existing mods
+                  <ArrowRight className="ml-1.5 h-4 w-4" />
+                </Link>
+              </div>
+            </div>
           </section>
 
-          <section className="grid gap-4 lg:grid-cols-3">
-            {workflowSteps.map(({ title, description, icon: Icon }, index) => (
-              <Card key={title} className="border-border/60">
-                <CardContent className="flex items-start gap-4 py-6">
-                  <div className="mt-0.5 rounded-md bg-secondary p-2 text-secondary-foreground">
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground">
+          <section className="space-y-5">
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Workflow
+              </p>
+              <h2 className="text-2xl font-semibold tracking-tight">
+                A cleaner path from idea to publish
+              </h2>
+            </div>
+
+            <div className="relative grid gap-6 md:grid-cols-3 md:gap-8 md:pt-8">
+              <div className="pointer-events-none absolute top-0 left-0 hidden h-px w-full bg-border/70 md:block" />
+              {workflowSteps.map(({ title, description, icon: Icon }, index) => (
+                <div key={title} className="relative space-y-3 md:pt-2">
+                  <div className="inline-flex items-center gap-3">
+                    <div className="rounded-md bg-secondary p-2 text-secondary-foreground">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <span className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                       Step {index + 1}
-                    </p>
-                    <h2 className="font-semibold">{title}</h2>
-                    <p className="text-sm text-muted-foreground">
-                      {description}
-                    </p>
+                    </span>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                  <h3 className="text-lg font-semibold">{title}</h3>
+                  <p className="max-w-sm text-sm text-muted-foreground">{description}</p>
+                </div>
+              ))}
+            </div>
           </section>
 
-          <section className="rounded-xl border border-border/60 bg-card/70 p-6 md:p-8">
+          <section className="rounded-2xl border border-border/60 bg-linear-to-r from-card/80 via-card/70 to-card/80 p-6 shadow-[0_20px_60px_-40px_rgba(168,85,247,0.65)] md:p-8">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="max-w-2xl space-y-2">
                 <h2 className="text-2xl font-semibold tracking-tight">
