@@ -23,7 +23,7 @@ export default function PublicLayout({
   modIconUrl,
 }: PublicLayoutProps) {
   const enhancedBreadcrumbs: BreadcrumbItem[] = [
-    { title: 'Docs', href: '/docs' },
+    { title: 'Mods', href: '/mods' },
     ...(modName && modSlug
       ? [{ title: modName, href: `/mod/${modSlug}` }]
       : []),
