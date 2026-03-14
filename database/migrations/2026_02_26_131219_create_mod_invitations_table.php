@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('mod_invitations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('mod_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('mod_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('invited_by')->constrained('users')->onDelete('cascade');
             $table->string('role');
