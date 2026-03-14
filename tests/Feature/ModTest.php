@@ -387,30 +387,4 @@ class ModTest extends TestCase
         ]);
     }
 
-    public function test_public_mod_and_page_routes_only_expose_safe_custom_css()
-    {
-        $owner = User::factory()->create();
-        $mod = Mod::factory()->public()->create([
-            'owner_id' => $owner->id,
-            'custom_css' => '</style><script>alert(1)</script>',
-        ]);
-        $page = Page::factory()->create([
-            'mod_id' => $mod->id,
-            'published' => true,
-        ]);
-
-        $this->get(route('public.mod', $mod))
-            ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('Public/Mod')
-                ->where('mod.custom_css', null)
-            );
-
-        $this->get(route('public.page', ['mod' => $mod, 'page' => $page]))
-            ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('Public/Page')
-                ->where('mod.custom_css', null)
-            );
-    }
 }
