@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('mods', function (Blueprint $table) {
-            $table->boolean('external_access')->default(true)->after('published');
+            $table->boolean('external_access')->default(true);
         });
     }
 
