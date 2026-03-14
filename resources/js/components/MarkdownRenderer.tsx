@@ -125,7 +125,7 @@ renderer.code = function ({ text, lang }: { text: string; lang?: string }) {
 };
 
 renderer.codespan = function ({ text }: { text: string }) {
-  return `<code class="inline-code">${text}</code>`;
+  return `<code class="inline-code">${escapeHtml(text)}</code>`;
 };
 
 marked.use(gfmHeadingId(), markedFootnote(), {
