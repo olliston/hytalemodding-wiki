@@ -64,27 +64,27 @@ export default function PublicPage({ mod, page, navigation }: Props) {
 
   const renderNavigation = (pages: NavigationPage[], level = 0) => {
     return pages.map((navPage) => (
-      <div key={navPage.id} className={`ml-${level * 3}`}>
+      <div key={navPage.id} style={{ marginLeft: level === 0 ? 0 : level * 12 }}>
         {navPage.kind === 'category' ? (
-          <div className="flex items-center rounded-md px-3 py-2 text-sm text-muted-foreground">
-            <BookOpenIcon className="mr-2 h-4 w-4 shrink-0" />
+          <div className="flex items-center gap-2 rounded-lg border border-transparent px-3 py-2 text-sm text-muted-foreground/90">
+            <BookOpenIcon className="h-4 w-4 shrink-0" />
             <span className="truncate">{navPage.title}</span>
           </div>
         ) : (
           <a
             href={`/mod/${mod.slug}/${navPage.slug}`}
-            className={`group flex items-center rounded-md px-3 py-2 text-sm transition-colors ${
+            className={`group flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:outline-none ${
               navPage.id === page.id
-                ? 'bg-accent font-medium text-accent-foreground'
-                : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                ? 'border-primary/25 bg-accent font-medium text-accent-foreground shadow-sm'
+                : 'border-transparent text-muted-foreground hover:border-border/70 hover:bg-accent/60 hover:text-foreground'
             }`}
           >
-            <BookOpenIcon className="mr-2 h-4 w-4 shrink-0" />
+            <BookOpenIcon className="h-4 w-4 shrink-0" />
             <span className="truncate">{navPage.title}</span>
           </a>
         )}
         {navPage.children && navPage.children.length > 0 && (
-          <div className="mt-1 ml-3 border-l border-border/50 pl-3">
+          <div className="mt-1 ml-2 border-l border-border/60 pl-2">
             {renderNavigation(navPage.children, level + 1)}
           </div>
         )}
@@ -124,11 +124,15 @@ export default function PublicPage({ mod, page, navigation }: Props) {
     >
       <Head title={`${page.title} - ${mod.name} Documentation`} />
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
-        <div className="lg:col-span-1">
-          <div className="sticky top-6 space-y-6">
-            <Card>
-              <CardHeader className="pb-4">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8 xl:gap-10">
+        <aside className="lg:col-span-4 xl:col-span-3">
+          <div className="sticky top-20 space-y-4">
+            <div className="px-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+              Overview
+            </div>
+
+            <Card className="overflow-hidden rounded-2xl border-border/70 bg-card/90 shadow-sm backdrop-blur-sm">
+              <CardHeader className="pb-3">
                 <CardTitle className="text-lg">
                   <a
                     href={`/mod/${mod.slug}`}
@@ -138,7 +142,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
                   </a>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3 pt-0">
                 <p className="text-sm text-muted-foreground">
                   {mod.description}
                 </p>
@@ -151,11 +155,13 @@ export default function PublicPage({ mod, page, navigation }: Props) {
             </Card>
 
             {/* Navigation */}
-            <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg">Contents</CardTitle>
+            <Card className="overflow-hidden rounded-2xl border-border/70 bg-card/90 shadow-sm backdrop-blur-sm">
+              <CardHeader className="border-b border-border/60 pb-3">
+                <CardTitle className="text-sm font-semibold tracking-wide uppercase">
+                  Contents
+                </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-3">
                 {navigation.length === 0 ? (
                   <div className="py-4 text-center">
                     <BookOpenIcon className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
@@ -164,20 +170,20 @@ export default function PublicPage({ mod, page, navigation }: Props) {
                     </p>
                   </div>
                 ) : (
-                  <nav className="space-y-1">
+                  <nav className="space-y-1 rounded-xl border border-border/60 bg-muted/10 p-2">
                     {renderNavigation(navigation)}
                   </nav>
                 )}
               </CardContent>
             </Card>
           </div>
-        </div>
+        </aside>
 
-        <div className="min-w-0 lg:col-span-3">
-          <Card className="mb-8">
-            <CardHeader className="border-b">
+        <main className="min-w-0 lg:col-span-8 xl:col-span-9">
+          <Card className="mb-8 overflow-hidden rounded-2xl border-border/70 bg-card/95 shadow-sm">
+            <CardHeader className="border-b border-border/60 bg-muted/10">
               <div className="space-y-2">
-                <CardTitle className="break-words text-2xl">{page.title}</CardTitle>
+                <CardTitle className="break-words text-2xl sm:text-3xl">{page.title}</CardTitle>
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span>Last updated {formatDate(page.updated_at)}</span>
                   {!page.published && <Badge variant="outline">Draft</Badge>}
@@ -197,7 +203,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
               </div>
             </CardContent>
 
-            <div className="border-t bg-muted/20 px-6 py-6">
+            <div className="border-t border-border/60 bg-muted/15 px-6 py-6">
               <div className="grid grid-cols-2 gap-6">
                 <div className="flex justify-start">
                   {prevPage && (
@@ -205,7 +211,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
                       variant="outline"
                       size="lg"
                       asChild
-                      className="group h-auto p-4 transition-all hover:shadow-md"
+                      className="group h-auto rounded-xl border-border/60 bg-background/70 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5"
                     >
                       <a
                         href={`/mod/${mod.slug}/${prevPage.slug}`}
@@ -231,7 +237,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
                       variant="outline"
                       size="lg"
                       asChild
-                      className="group h-auto p-4 transition-all hover:shadow-md"
+                      className="group h-auto rounded-xl border-border/60 bg-background/70 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5"
                     >
                       <a
                         href={`/mod/${mod.slug}/${nextPage.slug}`}
@@ -255,18 +261,18 @@ export default function PublicPage({ mod, page, navigation }: Props) {
           </Card>
 
           {page.children && page.children.length > 0 && (
-            <Card>
-              <CardHeader>
+            <Card className="overflow-hidden rounded-2xl border-border/70 bg-card/95 shadow-sm">
+              <CardHeader className="border-b border-border/60 bg-muted/10">
                 <CardTitle className="text-lg">Related Pages</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6">
                 <div className="grid gap-4 md:grid-cols-2">
                   {page.children
                     .filter((child) => child.kind !== 'category')
                     .map((child) => (
                       <Card
                         key={child.id}
-                        className="transition-shadow hover:shadow-md"
+                        className="border-border/60 bg-background/70 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5"
                       >
                         <CardContent className="p-4">
                           <a
@@ -287,7 +293,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
               </CardContent>
             </Card>
           )}
-        </div>
+        </main>
       </div>
     </PublicLayout>
   );
