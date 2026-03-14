@@ -557,6 +557,7 @@ class PageController extends Controller
             'icon_url' => $mod->icon_url,
             'visibility' => $mod->visibility,
             'github_repository_url' => $mod->github_repository_url,
+            'custom_css' => $mod->safe_custom_css,
             'owner' => $this->serializeOwner($mod->owner),
         ];
     }

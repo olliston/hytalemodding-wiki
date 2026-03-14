@@ -96,7 +96,7 @@ export default function EditPage({ mod, page, potentialParents }: Props) {
   }, [pageUrl, data]);
 
   return (
-    <AppLayout>
+    <AppLayout contentWidth="full">
       <Head title={`Edit ${page.title} - ${mod.name}`} />
 
       <div className="mx-auto max-w-full px-4 py-6 sm:px-6 lg:px-8">

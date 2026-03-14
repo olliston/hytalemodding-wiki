@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Mod;
+use App\Models\Page;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -292,4 +293,98 @@ class ModTest extends TestCase
         $this->assertSame('https://github.com/acme/docs-repo', $mod->github_repository_url);
         $this->assertSame('docs/guides', $mod->github_repository_path);
     }
+
+    public function test_owner_can_update_custom_css()
+    {
+        $owner = User::factory()->create();
+        $mod = Mod::factory()->create([
+            'owner_id' => $owner->id,
+            'custom_css' => null,
+        ]);
+
+        $this->actingAs($owner);
+
+        $response = $this->patch(route('mods.css.update', $mod), [
+            'custom_css' => '.prose h1 { color: red; }',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('mods', [
+            'id' => $mod->id,
+            'custom_css' => '.prose h1 { color: red; }',
+        ]);
+    }
+
+    public function test_non_owner_cannot_update_custom_css()
+    {
+        $owner = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $mod = Mod::factory()->create([
+            'owner_id' => $owner->id,
+            'custom_css' => '.prose h1 { color: blue; }',
+        ]);
+
+        $this->actingAs($otherUser);
+
+        $response = $this->patch(route('mods.css.update', $mod), [
+            'custom_css' => '.prose h1 { color: red; }',
+        ]);
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('mods', [
+            'id' => $mod->id,
+            'custom_css' => '.prose h1 { color: blue; }',
+        ]);
+    }
+
+    public function test_owner_cannot_save_dangerous_custom_css_in_css_editor()
+    {
+        $owner = User::factory()->create();
+        $mod = Mod::factory()->create([
+            'owner_id' => $owner->id,
+            'custom_css' => '.prose h1 { color: blue; }',
+        ]);
+
+        $this->actingAs($owner);
+
+        $response = $this->from(route('mods.css-editor', $mod))->patch(route('mods.css.update', $mod), [
+            'custom_css' => '</style><script>alert(1)</script>@import url(https://evil.test/payload.css);',
+        ]);
+
+        $response->assertRedirect(route('mods.css-editor', $mod));
+        $response->assertSessionHasErrors('custom_css');
+
+        $this->assertDatabaseHas('mods', [
+            'id' => $mod->id,
+            'custom_css' => '.prose h1 { color: blue; }',
+        ]);
+    }
+
+    public function test_owner_cannot_save_dangerous_custom_css_in_mod_settings()
+    {
+        $owner = User::factory()->create();
+        $mod = Mod::factory()->create([
+            'owner_id' => $owner->id,
+            'custom_css' => null,
+        ]);
+
+        $this->actingAs($owner);
+
+        $response = $this->from(route('mods.edit', $mod))->patch(route('mods.update', $mod), [
+            'name' => $mod->name,
+            'description' => $mod->description,
+            'visibility' => $mod->visibility,
+            'storage_driver' => $mod->storage_driver,
+            'custom_css' => 'body { background-image: url(javascript:alert(1)); }',
+        ]);
+
+        $response->assertRedirect(route('mods.edit', $mod));
+        $response->assertSessionHasErrors('custom_css');
+
+        $this->assertDatabaseHas('mods', [
+            'id' => $mod->id,
+            'custom_css' => null,
+        ]);
+    }
+
 }

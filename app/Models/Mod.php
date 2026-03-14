@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Support\CustomCssSanitizer;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -22,6 +24,7 @@ class Mod extends Model
         'external_access',
         'github_repository_url',
         'github_repository_path',
+        'custom_css',
         'custom_domain',
         'domain_verified',
         'domain_verification_token',
@@ -32,6 +35,20 @@ class Mod extends Model
         'external_access' => 'boolean',
         'domain_verified' => 'boolean',
     ];
+
+    protected function customCss(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) => CustomCssSanitizer::normalize($value),
+        );
+    }
+
+    protected function safeCustomCss(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => CustomCssSanitizer::sanitizeForOutput($this->attributes['custom_css'] ?? null),
+        );
+    }
 
     protected static function boot()
     {

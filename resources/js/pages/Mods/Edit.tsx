@@ -40,6 +40,7 @@ interface Mod {
   external_access: boolean;
   github_repository_url?: string | null;
   github_repository_path?: string | null;
+  custom_css?: string | null;
   custom_domain?: string | null;
   domain_verified: boolean;
   domain_verification_token?: string | null;
@@ -68,6 +69,7 @@ export default function EditMod({ mod }: Props) {
     external_access: mod.external_access || false,
     github_repository_url: mod.github_repository_url || '',
     github_repository_path: mod.github_repository_path || '',
+    custom_css: mod.custom_css || '',
     custom_domain: mod.custom_domain || '',
     icon: null as File | null,
   });
@@ -150,12 +152,21 @@ export default function EditMod({ mod }: Props) {
 
       <div className="space-y-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <nav className="mb-4 text-sm text-primary">
-            <a href={`/dashboard/mods/${mod.slug}`} className="hover:underline">
-              {mod.name}
+          <nav className="mb-4 flex items-center justify-between text-sm text-primary">
+            <div>
+              <a href={`/dashboard/mods/${mod.slug}`} className="hover:underline">
+                {mod.name}
+              </a>
+              <ChevronRightIcon className="m-1 inline h-4 w-4" />
+              <span>Settings</span>
+            </div>
+            <a
+              href={`/dashboard/mods/${mod.slug}/css-editor`}
+              className="flex items-center gap-1.5 rounded-md border border-violet-500/40 bg-violet-500/10 px-3 py-1.5 text-xs font-medium text-violet-600 transition-colors hover:bg-violet-500/20 dark:text-violet-400"
+            >
+              <span>✨</span>
+              CSS Editor
             </a>
-            <ChevronRightIcon className="m-1 inline h-4 w-4" />
-            <span>Settings</span>
           </nav>
         </div>
 
@@ -457,6 +468,40 @@ export default function EditMod({ mod }: Props) {
                       )}
                     </div>
                   */}
+
+                  <Separator />
+                  <div className="space-y-2">
+                    <Label htmlFor="custom_css">Custom CSS</Label>
+                    <div className="relative overflow-hidden rounded-md border border-border/70 bg-muted/10 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30">
+                      <div className="flex items-center justify-between border-b border-border/60 bg-muted/30 px-3 py-1.5">
+                        <span className="text-xs font-medium text-muted-foreground">
+                          CSS
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          Applied to all public pages
+                        </span>
+                      </div>
+                      <textarea
+                        id="custom_css"
+                        value={data.custom_css}
+                        onChange={(e) => setData('custom_css', e.target.value)}
+                        placeholder={`/* Custom styles for your mod's public pages */\n\n.prose h1 {\n  color: #your-color;\n}\n\nbody {\n  --background: your-value;\n}`}
+                        rows={14}
+                        spellCheck={false}
+                        className="w-full resize-y bg-transparent p-4 font-mono text-sm leading-relaxed text-foreground outline-none placeholder:text-muted-foreground/50"
+                      />
+                    </div>
+                    {errors.custom_css && (
+                      <p className="text-sm text-destructive">
+                        {errors.custom_css}
+                      </p>
+                    )}
+                    <p className="text-sm text-muted-foreground">
+                      Write CSS that will be injected into all public-facing
+                      pages of this mod. Use with care — this affects all
+                      visitors.
+                    </p>
+                  </div>
 
                   <Separator />
                   <div className="flex items-center space-x-3">
