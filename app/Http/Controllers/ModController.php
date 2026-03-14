@@ -6,6 +6,7 @@ use App\Mail\CollaboratorInvitation;
 use App\Models\Mod;
 use App\Models\ModInvitation;
 use App\Models\User;
+use App\Support\CustomCssSanitizer;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -182,6 +183,7 @@ class ModController extends Controller
             'external_access' => 'nullable|boolean',
             'github_repository_url' => ['nullable', 'string', 'max:255', 'url', 'regex:/^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+(?:\.git)?\/?$/'],
             'github_repository_path' => 'nullable|string|max:512',
+            'custom_css' => $this->customCssRules(),
         ]);
 
         $validated['github_repository_url'] = blank($validated['github_repository_url'] ?? null)
@@ -242,6 +244,42 @@ class ModController extends Controller
 
         return redirect()->route('mods.index')
             ->with('success', 'Mod deleted successfully!');
+    }
+
+    /**
+     * Show the CSS editor page.
+     */
+    public function cssEditor(Mod $mod)
+    {
+        $user = Auth::user();
+
+        if (! $mod->userCan($user, 'manage_settings')) {
+            abort(403);
+        }
+
+        return Inertia::render('Mods/CssEditor', [
+            'mod' => $mod,
+        ]);
+    }
+
+    /**
+     * Update only the custom CSS for a mod.
+     */
+    public function updateCss(Request $request, Mod $mod)
+    {
+        $user = Auth::user();
+
+        if (! $mod->userCan($user, 'manage_settings')) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'custom_css' => $this->customCssRules(),
+        ]);
+
+        $mod->update(['custom_css' => $validated['custom_css'] ?? null]);
+
+        return back()->with('success', 'CSS saved successfully!');
     }
 
     /**
@@ -451,6 +489,7 @@ class ModController extends Controller
                 'description' => $mod->description,
                 'icon_url' => $mod->icon_url,
                 'visibility' => $mod->visibility,
+                'custom_css' => $mod->safe_custom_css,
                 'owner' => $this->serializeOwner($mod->owner),
                 'root_pages' => $rootPages->map(function ($page) {
                     return [
@@ -482,6 +521,20 @@ class ModController extends Controller
                 ] : null,
             ],
         ]);
+    }
+
+    private function customCssRules(): array
+    {
+        return [
+            'nullable',
+            'string',
+            'max:65535',
+            function (string $attribute, mixed $value, \Closure $fail): void {
+                foreach (CustomCssSanitizer::violations(is_string($value) ? $value : null) as $violation) {
+                    $fail($violation);
+                }
+            },
+        ];
     }
 
     private function sanitizePublicModPaginator(LengthAwarePaginator $mods): LengthAwarePaginator

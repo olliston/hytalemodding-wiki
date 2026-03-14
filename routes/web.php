@@ -90,6 +90,8 @@ Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified']], f
 
     Route::resource('/mods', ModController::class)->except(['show']);
     Route::get('/mods/{mod:slug}', [ModController::class, 'show'])->name('mods.show');
+    Route::get('/mods/{mod:slug}/css-editor', [ModController::class, 'cssEditor'])->name('mods.css-editor');
+    Route::patch('/mods/{mod:slug}/css', [ModController::class, 'updateCss'])->name('mods.css.update');
 
     Route::get('/mods/{mod:slug}/collaborators', [ModController::class, 'manageCollaborators'])->name('mods.collaborators.index');
     Route::post('/mods/{mod:slug}/collaborators', [ModController::class, 'addCollaborator'])->name('mods.collaborators.store');

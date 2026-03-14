@@ -366,6 +366,11 @@ function QuickActions({
           description="Manage your mod settings"
           href={`/dashboard/mods/${mod.slug}/edit`}
         />
+        <QuickActionButton
+          label="CSS Editor"
+          description="Customize the look of your public pages with CSS"
+          href={`/dashboard/mods/${mod.slug}/css-editor`}
+        />
       </div>
     </div>
   );

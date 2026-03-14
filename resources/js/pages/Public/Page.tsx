@@ -44,6 +44,7 @@ interface Mod {
   description: string;
   icon_url?: string;
   visibility: 'public' | 'private' | 'unlisted';
+  custom_css?: string | null;
   owner: User;
 }
 
@@ -120,6 +121,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
       modName={mod.name}
       modSlug={mod.slug}
       modIconUrl={mod.icon_url}
+      customCss={mod.custom_css}
       breadcrumbs={breadcrumbs}
     >
       <Head title={`${page.title} - ${mod.name} Documentation`} />

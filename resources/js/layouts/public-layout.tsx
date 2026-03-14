@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Toaster } from 'sileo';
 
 import AppNavbar from '@/components/app-navbar';
@@ -13,6 +14,7 @@ interface PublicLayoutProps {
   modName?: string;
   modSlug?: string;
   modIconUrl?: string;
+  customCss?: string | null;
 }
 
 export default function PublicLayout({
@@ -21,7 +23,35 @@ export default function PublicLayout({
   modName,
   modSlug,
   modIconUrl,
+  customCss,
 }: PublicLayoutProps) {
+  useEffect(() => {
+    const styleId = 'mod-custom-css';
+    const existing = document.getElementById(styleId);
+
+    if (!customCss) {
+      existing?.remove();
+
+      return;
+    }
+
+    const styleEl =
+      existing instanceof HTMLStyleElement
+        ? existing
+        : document.createElement('style');
+
+    styleEl.id = styleId;
+    styleEl.textContent = customCss;
+
+    if (!styleEl.parentNode) {
+      document.head.appendChild(styleEl);
+    }
+
+    return () => {
+      styleEl.remove();
+    };
+  }, [customCss, modSlug]);
+
   const enhancedBreadcrumbs: BreadcrumbItem[] = [
     { title: 'Mods', href: '/mods' },
     ...(modName && modSlug

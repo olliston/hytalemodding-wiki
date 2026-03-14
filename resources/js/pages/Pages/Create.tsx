@@ -78,7 +78,7 @@ export default function CreatePage({
   }, [post, mod.slug, setData]);
 
   return (
-    <AppLayout>
+    <AppLayout contentWidth="full">
       <Head title={`Create Page - ${mod.name}`} />
 
       <div className="mx-auto max-w-full px-4 py-6 sm:px-6 lg:px-8">
