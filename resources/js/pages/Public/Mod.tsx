@@ -140,7 +140,7 @@ export default function PublicMod({ mod }: Props) {
             </Card>
 
             {/* Navigation Card */}
-            <Card className="overflow-hidden gap-0 rounded-2xl border-border/70 bg-card/90 shadow-sm backdrop-blur-sm">
+            <Card className="gap-0 overflow-hidden rounded-2xl border-border/70 bg-card/90 shadow-sm backdrop-blur-sm">
               <CardHeader className="border-b border-border/60 pb-3">
                 <CardTitle className="text-sm font-semibold tracking-wide uppercase">
                   Documentation
@@ -155,9 +155,7 @@ export default function PublicMod({ mod }: Props) {
                     </p>
                   </div>
                 ) : (
-                  <nav>
-                    {renderPageTree(mod.root_pages)}
-                  </nav>
+                  <nav>{renderPageTree(mod.root_pages)}</nav>
                 )}
               </CardContent>
             </Card>
