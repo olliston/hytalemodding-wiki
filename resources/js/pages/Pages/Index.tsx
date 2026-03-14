@@ -275,7 +275,9 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
     level = 0,
     ancestorLines: boolean[] = [],
   ) => {
-    const sortedPages = [...pageList].sort((a, b) => a.order_index - b.order_index);
+    const sortedPages = [...pageList].sort(
+      (a, b) => a.order_index - b.order_index,
+    );
     const droppableId = parentId ? `pages-${parentId}` : 'pages-root';
 
     return (

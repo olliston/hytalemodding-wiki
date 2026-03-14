@@ -90,7 +90,8 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
               </span>
             )}
           </div>
-          {navPage.children && navPage.children.length > 0 &&
+          {navPage.children &&
+            navPage.children.length > 0 &&
             renderNavigation(navPage.children, level + 1)}
         </div>
       ));
@@ -267,8 +268,8 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
             <div className="mt-8 border-t pt-6 text-sm">
               <div className="flex items-center justify-between text-muted-foreground">
                 <div>
-                  Last updated by {page.updater?.name || page.creator.name}
-                  on {formatDate(page.updated_at)}
+                  Last updated by {page.updater?.name || page.creator.name} on{' '}
+                  {formatDate(page.updated_at)}
                 </div>
                 {canEdit && !isGithubManaged && (
                   <Button size="sm" variant="outline" asChild>
