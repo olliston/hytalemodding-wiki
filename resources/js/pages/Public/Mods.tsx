@@ -1,10 +1,11 @@
 import { BookOpenIcon } from '@heroicons/react/24/outline';
-import { Head, Link, router } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { useState } from 'react';
 
 import AppFooter from '@/components/app-footer';
 import AppNavbar from '@/components/app-navbar';
+import SeoMeta from '@/components/SeoMeta';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -66,9 +67,13 @@ export default function PublicMods({ mods, query }: Props) {
     });
   }
 
+  const description = query
+    ? `Browse ${mods.total} Hytale mod wikis matching "${query}".`
+    : 'Explore publicly available Hytale mod wikis from the community.';
+
   return (
     <>
-      <Head title="Browse Mods" />
+      <SeoMeta title="Browse Mods" description={description} />
 
       <div className="flex min-h-screen flex-col bg-background text-foreground">
         <AppNavbar brandHref="/" />

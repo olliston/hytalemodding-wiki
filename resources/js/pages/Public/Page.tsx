@@ -3,9 +3,9 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline';
-import { Head } from '@inertiajs/react';
 
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import SeoMeta from '@/components/SeoMeta';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -119,6 +119,11 @@ export default function PublicPage({ mod, page, navigation }: Props) {
     { title: page.title, href: `/mod/${mod.slug}/${page.slug}` },
   ];
 
+  const metaDescription =
+    getMarkdownPreview(page.content || '', 180) ||
+    mod.description ||
+    `Read ${page.title} in ${mod.name} documentation.`;
+
   return (
     <PublicLayout
       modName={mod.name}
@@ -127,7 +132,12 @@ export default function PublicPage({ mod, page, navigation }: Props) {
       customCss={mod.custom_css}
       breadcrumbs={breadcrumbs}
     >
-      <Head title={`${page.title} - ${mod.name} Documentation`} />
+      <SeoMeta
+        title={`${page.title} - ${mod.name} Documentation`}
+        description={metaDescription}
+        image={mod.icon_url}
+        type="article"
+      />
 
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8 xl:gap-10">
         <aside className="lg:col-span-4 xl:col-span-3">

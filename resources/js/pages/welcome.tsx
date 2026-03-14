@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
   ArrowRight,
   Rocket,
@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import AppFooter from '@/components/app-footer';
 import HytaleModdingLogo from '@/components/hytale-modding-logo';
+import SeoMeta from '@/components/SeoMeta';
 import { Button } from '@/components/ui/button';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { dashboard, home, login, register } from '@/routes';
@@ -47,7 +48,10 @@ export default function Welcome({
 
   return (
     <>
-      <Head title="Welcome" />
+      <SeoMeta
+        title="Welcome"
+        description="Create mod wikis, publish polished guides, and share one source of truth for your Hytale community."
+      />
 
       <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
         <nav className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">

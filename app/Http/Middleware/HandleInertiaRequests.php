@@ -35,9 +35,17 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $siteName = (string) config('app.name');
+
         return [
             ...parent::share($request),
-            'name' => config('app.name'),
+            'name' => $siteName,
+            'meta' => [
+                'site_name' => $siteName,
+                'default_description' => 'Build and share polished documentation for Hytale mods.',
+                'current_url' => $request->fullUrl(),
+                'default_image' => $request->getSchemeAndHttpHost().'/banner_transparent_light.png',
+            ],
             'auth' => [
                 'user' => $request->user(),
             ],

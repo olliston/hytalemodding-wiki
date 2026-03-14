@@ -1,7 +1,7 @@
 import { BookOpenIcon } from '@heroicons/react/24/outline';
-import { Head } from '@inertiajs/react';
 
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import SeoMeta from '@/components/SeoMeta';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -93,6 +93,11 @@ export default function PublicMod({ mod }: Props) {
     .filter((page) => page.kind !== 'category')
     .slice(0, 3);
 
+  const metaDescription =
+    mod.description ||
+    getMarkdownPreview(mod.index_page?.content || '', 180) ||
+    `Read ${mod.name} documentation on HytaleModding.`;
+
   return (
     <PublicLayout
       modName={mod.name}
@@ -100,7 +105,11 @@ export default function PublicMod({ mod }: Props) {
       modIconUrl={mod.icon_url}
       customCss={mod.custom_css}
     >
-      <Head title={`${mod.name} Documentation`} />
+      <SeoMeta
+        title={`${mod.name} Documentation`}
+        description={metaDescription}
+        image={mod.icon_url}
+      />
 
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8 xl:gap-10">
         <aside className="lg:col-span-4 xl:col-span-3">

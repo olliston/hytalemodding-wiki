@@ -1,12 +1,16 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 
 import AppFooter from '@/components/app-footer';
+import SeoMeta from '@/components/SeoMeta';
 import { home } from '@/routes';
 
 export default function PrivacyPolicy() {
   return (
     <>
-      <Head title="Privacy Policy" />
+      <SeoMeta
+        title="Privacy Policy"
+        description="Read how HytaleModding collects, uses, and protects your information."
+      />
 
       <div className="flex min-h-screen flex-col bg-background text-foreground">
         <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-12 md:py-16">
