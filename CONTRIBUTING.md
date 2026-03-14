@@ -78,14 +78,10 @@ php artisan key:generate
 php artisan migrate --seed
 ```
 
-6. Start the development servers (run these in separate terminals):
+6. Start the development server:
 
 ```bash
-# Terminal 1: Frontend dev server
-bun run dev
-
-# Terminal 2: Backend dev server
-php artisan serve
+composer dev
 ```
 
 7. Open [http://localhost:8000](http://localhost:8000) in your browser
