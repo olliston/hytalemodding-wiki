@@ -48,17 +48,35 @@ export default function SeoMeta({
 
   return (
     <Head title={title}>
-      <meta head-key="meta-description" name="description" content={resolvedDescription} />
+      <meta
+        head-key="meta-description"
+        name="description"
+        content={resolvedDescription}
+      />
       {resolvedUrl && (
         <link head-key="meta-canonical" rel="canonical" href={resolvedUrl} />
       )}
-      <meta head-key="meta-robots" name="robots" content={noIndex ? 'noindex, nofollow' : 'index, follow'} />
+      <meta
+        head-key="meta-robots"
+        name="robots"
+        content={noIndex ? 'noindex, nofollow' : 'index, follow'}
+      />
 
       <meta head-key="og-type" property="og:type" content={type} />
-      <meta head-key="og-site-name" property="og:site_name" content={siteName} />
+      <meta
+        head-key="og-site-name"
+        property="og:site_name"
+        content={siteName}
+      />
       <meta head-key="og-title" property="og:title" content={ogTitle} />
-      <meta head-key="og-description" property="og:description" content={resolvedDescription} />
-      {resolvedUrl && <meta head-key="og-url" property="og:url" content={resolvedUrl} />}
+      <meta
+        head-key="og-description"
+        property="og:description"
+        content={resolvedDescription}
+      />
+      {resolvedUrl && (
+        <meta head-key="og-url" property="og:url" content={resolvedUrl} />
+      )}
       {resolvedImage && (
         <meta head-key="og-image" property="og:image" content={resolvedImage} />
       )}
@@ -75,9 +93,12 @@ export default function SeoMeta({
         content={resolvedDescription}
       />
       {resolvedImage && (
-        <meta head-key="twitter-image" name="twitter:image" content={resolvedImage} />
+        <meta
+          head-key="twitter-image"
+          name="twitter:image"
+          content={resolvedImage}
+        />
       )}
     </Head>
   );
 }
-

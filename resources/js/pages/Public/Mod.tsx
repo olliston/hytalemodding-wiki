@@ -53,7 +53,7 @@ export default function PublicMod({ mod }: Props) {
 
   const renderPageTree = (pages: Page[], level = 0) => {
     return pages.map((page) => (
-      <div key={page.id} style={{ marginLeft: level === 0 ? 0 : level * 12 }}>
+      <div key={page.id} style={{ marginLeft: level === 0 ? 0 : level * 2 }}>
         {page.kind === 'category' ? (
           <div className="flex items-center gap-2 rounded-lg border border-transparent px-3 py-2 text-sm">
             <BookOpenIcon className="h-4 w-4 text-muted-foreground" />
@@ -140,13 +140,13 @@ export default function PublicMod({ mod }: Props) {
             </Card>
 
             {/* Navigation Card */}
-            <Card className="overflow-hidden rounded-2xl border-border/70 bg-card/90 shadow-sm backdrop-blur-sm">
+            <Card className="gap-0 overflow-hidden rounded-2xl border-border/70 bg-card/90 shadow-sm backdrop-blur-sm">
               <CardHeader className="border-b border-border/60 pb-3">
                 <CardTitle className="text-sm font-semibold tracking-wide uppercase">
                   Documentation
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-3">
+              <CardContent className="p-3">
                 {mod.root_pages.length === 0 ? (
                   <div className="py-8 text-center">
                     <BookOpenIcon className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
@@ -155,9 +155,7 @@ export default function PublicMod({ mod }: Props) {
                     </p>
                   </div>
                 ) : (
-                  <nav className="space-y-1 rounded-xl border border-border/60 bg-muted/10 p-2">
-                    {renderPageTree(mod.root_pages)}
-                  </nav>
+                  <nav>{renderPageTree(mod.root_pages)}</nav>
                 )}
               </CardContent>
             </Card>
