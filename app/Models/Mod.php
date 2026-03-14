@@ -22,11 +22,15 @@ class Mod extends Model
         'external_access',
         'github_repository_url',
         'github_repository_path',
+        'custom_domain',
+        'domain_verified',
+        'domain_verification_token',
     ];
 
     protected $casts = [
         'id' => 'string',
         'external_access' => 'boolean',
+        'domain_verified' => 'boolean',
     ];
 
     protected static function boot()

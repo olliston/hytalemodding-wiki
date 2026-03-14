@@ -3,13 +3,23 @@
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\ModController;
 use App\Http\Controllers\PageController;
+use App\Http\Middleware\ResolveModByDomain;
 use App\Services\PageViewService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
-Route::get('/', function () {
+Route::get('/', function (Request $request) {
+    if ($request->attributes->get('resolved_mod')) {
+        return app(ModController::class)->publicShowResolved($request);
+    }
+
+    if (! ResolveModByDomain::isFirstPartyHost($request->getHost()) && ! ResolveModByDomain::isLocalHost($request->getHost())) {
+        abort(404, 'Documentation not found');
+    }
+
     return Inertia::render('welcome', [
         'canRegister' => Features::enabled(Features::registration()),
     ]);
@@ -90,6 +100,7 @@ Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified']], f
 
     Route::resource('/mods', ModController::class)->except(['show']);
     Route::get('/mods/{mod:slug}', [ModController::class, 'show'])->name('mods.show');
+    Route::post('/mods/{mod:slug}/domain/verify', [ModController::class, 'verifyDomain'])->name('mods.domain.verify');
 
     Route::get('/mods/{mod:slug}/collaborators', [ModController::class, 'manageCollaborators'])->name('mods.collaborators.index');
     Route::post('/mods/{mod:slug}/collaborators', [ModController::class, 'addCollaborator'])->name('mods.collaborators.store');
@@ -121,6 +132,11 @@ Route::group(['prefix' => '/dashboard', 'middleware' => ['auth', 'verified']], f
 Route::get('/mods', [ModController::class, 'publicIndex'])->name('public.mods');
 Route::get('/mod/{mod:slug}', [ModController::class, 'publicShow'])->name('public.mod');
 Route::get('/mod/{mod:slug}/{page:slug}', [PageController::class, 'publicShow'])->name('public.page');
+
+Route::middleware('mod.domain')
+    ->get('/{pageSlug}', [PageController::class, 'publicShowResolved'])
+    ->where('pageSlug', '[A-Za-z0-9\-_]+')
+    ->name('public.page.domain');
 
 Route::get('invitations/{token}', [ModController::class, 'showInvitation'])->name('invitations.show');
 Route::post('invitations/{token}/accept', [ModController::class, 'acceptInvitation'])->name('invitations.accept')->middleware('auth');

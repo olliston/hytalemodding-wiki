@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class ModController extends Controller
@@ -182,6 +183,13 @@ class ModController extends Controller
             'external_access' => 'nullable|boolean',
             'github_repository_url' => ['nullable', 'string', 'max:255', 'url', 'regex:/^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+(?:\.git)?\/?$/'],
             'github_repository_path' => 'nullable|string|max:512',
+            'custom_domain' => [
+                'nullable',
+                'string',
+                'max:255',
+                'regex:/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/',
+                Rule::unique('mods', 'custom_domain')->ignore($mod->id),
+            ],
         ]);
 
         $validated['github_repository_url'] = blank($validated['github_repository_url'] ?? null)
@@ -191,6 +199,17 @@ class ModController extends Controller
         $validated['github_repository_path'] = blank($validated['github_repository_path'] ?? null)
             ? null
             : trim((string) $validated['github_repository_path'], '/');
+
+        $validated['custom_domain'] = blank($validated['custom_domain'] ?? null)
+            ? null
+            : strtolower(trim((string) $validated['custom_domain']));
+
+        if ($validated['custom_domain'] !== $mod->custom_domain) {
+            $validated['domain_verified'] = false;
+            $validated['domain_verification_token'] = $validated['custom_domain']
+                ? 'wiki-verify='.Str::random(32)
+                : null;
+        }
 
         if ($validated['name'] !== $mod->name) {
             $slug = Str::slug($validated['name']);
@@ -424,11 +443,115 @@ class ModController extends Controller
      */
     public function publicShow($slug)
     {
+        return $this->publicShowForSlug(request(), (string) $slug);
+    }
+
+    /**
+     * Public documentation view for custom-domain requests.
+     */
+    public function publicShowResolved(Request $request)
+    {
+        $mod = $request->attributes->get('resolved_mod');
+
+        if (! $mod instanceof Mod) {
+            abort(404, 'Documentation not found');
+        }
+
+        if (! in_array($mod->visibility, ['public', 'unlisted'], true)) {
+            abort(404, 'Documentation not found');
+        }
+
+        return Inertia::render('Public/Mod', [
+            'mod' => $this->buildPublicModPayload($mod->load(['owner'])),
+        ]);
+    }
+
+    /**
+     * Verify DNS ownership for an assigned custom domain.
+     */
+    public function verifyDomain(Request $request, Mod $mod)
+    {
+        $user = Auth::user();
+
+        if (! $mod->userCan($user, 'manage_settings')) {
+            abort(403);
+        }
+
+        if (blank($mod->custom_domain) || blank($mod->domain_verification_token)) {
+            $message = 'Set a custom domain first to generate a verification token.';
+
+            return $request->expectsJson()
+                ? response()->json(['message' => $message], 422)
+                : back()->withErrors(['custom_domain' => $message]);
+        }
+
+        $txtRecords = dns_get_record($mod->custom_domain, DNS_TXT) ?: [];
+        $txtVerified = collect($txtRecords)->contains(function (array $record) use ($mod) {
+            $value = (string) ($record['txt'] ?? '');
+
+            return str_contains($value, (string) $mod->domain_verification_token);
+        });
+
+        $appHost = (string) parse_url((string) config('app.url'), PHP_URL_HOST);
+        $cnameRecords = dns_get_record($mod->custom_domain, DNS_CNAME) ?: [];
+        $cnameVerified = collect($cnameRecords)->contains(function (array $record) use ($appHost) {
+            $target = rtrim(strtolower((string) ($record['target'] ?? '')), '.');
+
+            return $target !== '' && $appHost !== '' && $target === strtolower($appHost);
+        });
+
+        if ($txtVerified || $cnameVerified) {
+            $mod->update([
+                'domain_verified' => true,
+            ]);
+
+            return $request->expectsJson()
+                ? response()->json(['verified' => true, 'message' => 'Domain verified successfully.'])
+                : back()->with('success', 'Domain verified successfully.');
+        }
+
+        $mod->update([
+            'domain_verified' => false,
+        ]);
+
+        $message = 'Domain verification failed. Add the TXT token or CNAME record and try again.';
+
+        return $request->expectsJson()
+            ? response()->json(['verified' => false, 'message' => $message], 422)
+            : back()->withErrors(['custom_domain' => $message]);
+    }
+
+
+    private function publicShowForSlug(Request $request, string $slug)
+    {
+        $resolvedMod = $request->attributes->get('resolved_mod');
+
+        if ($resolvedMod instanceof Mod) {
+            if ($resolvedMod->slug !== $slug) {
+                abort(404, 'Documentation not found');
+            }
+
+            if (! in_array($resolvedMod->visibility, ['public', 'unlisted'], true)) {
+                abort(404, 'Documentation not found');
+            }
+
+            return Inertia::render('Public/Mod', [
+                'mod' => $this->buildPublicModPayload($resolvedMod->load(['owner'])),
+            ]);
+        }
+
         $mod = Mod::where('slug', $slug)
             ->whereIn('visibility', ['public', 'unlisted'])
             ->with(['owner'])
             ->firstOrFail();
 
+        return Inertia::render('Public/Mod', [
+            'mod' => $this->buildPublicModPayload($mod),
+        ]);
+    }
+
+    private function buildPublicModPayload(Mod $mod): array
+    {
         $rootPages = $mod->pages()
             ->whereNull('parent_id')
             ->where('published', true)
@@ -443,45 +566,44 @@ class ModController extends Controller
             ->where('published', true)
             ->first();
 
-        return Inertia::render('Public/Mod', [
-            'mod' => [
-                'id' => $mod->id,
-                'name' => $mod->name,
-                'slug' => $mod->slug,
-                'description' => $mod->description,
-                'icon_url' => $mod->icon_url,
-                'visibility' => $mod->visibility,
-                'owner' => $this->serializeOwner($mod->owner),
-                'root_pages' => $rootPages->map(function ($page) {
-                    return [
-                        'id' => $page->id,
-                        'title' => $page->title,
-                        'slug' => $page->slug,
-                        'kind' => $page->kind,
-                        'content' => substr($page->content ?? '', 0, 200),
-                        'published' => $page->published,
-                        'updated_at' => $page->updated_at,
-                        'children' => $page->children->map(function ($child) {
-                            return [
-                                'id' => $child->id,
-                                'title' => $child->title,
-                                'slug' => $child->slug,
-                                'kind' => $child->kind,
-                                'published' => $child->published,
-                            ];
-                        })->toArray(),
-                    ];
-                }),
-                'index_page' => $indexPage ? [
-                    'id' => $indexPage->id,
-                    'title' => $indexPage->title,
-                    'slug' => $indexPage->slug,
-                    'kind' => $indexPage->kind,
-                    'content' => $indexPage->content,
-                    'updated_at' => $indexPage->updated_at,
-                ] : null,
-            ],
-        ]);
+        return [
+            'id' => $mod->id,
+            'name' => $mod->name,
+            'slug' => $mod->slug,
+            'description' => $mod->description,
+            'icon_url' => $mod->icon_url,
+            'visibility' => $mod->visibility,
+            'custom_domain' => $mod->custom_domain,
+            'owner' => $this->serializeOwner($mod->owner),
+            'root_pages' => $rootPages->map(function ($page) {
+                return [
+                    'id' => $page->id,
+                    'title' => $page->title,
+                    'slug' => $page->slug,
+                    'kind' => $page->kind,
+                    'content' => substr($page->content ?? '', 0, 200),
+                    'published' => $page->published,
+                    'updated_at' => $page->updated_at,
+                    'children' => $page->children->map(function ($child) {
+                        return [
+                            'id' => $child->id,
+                            'title' => $child->title,
+                            'slug' => $child->slug,
+                            'kind' => $child->kind,
+                            'published' => $child->published,
+                        ];
+                    })->toArray(),
+                ];
+            }),
+            'index_page' => $indexPage ? [
+                'id' => $indexPage->id,
+                'title' => $indexPage->title,
+                'slug' => $indexPage->slug,
+                'kind' => $indexPage->kind,
+                'content' => $indexPage->content,
+                'updated_at' => $indexPage->updated_at,
+            ] : null,
+        ];
     }
 
     private function sanitizePublicModPaginator(LengthAwarePaginator $mods): LengthAwarePaginator

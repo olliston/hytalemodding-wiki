@@ -40,6 +40,9 @@ interface Mod {
   external_access: boolean;
   github_repository_url?: string | null;
   github_repository_path?: string | null;
+  custom_domain?: string | null;
+  domain_verified: boolean;
+  domain_verification_token?: string | null;
 }
 
 interface Props {
@@ -47,9 +50,15 @@ interface Props {
 }
 
 export default function EditMod({ mod }: Props) {
+  // Custom-domain settings are temporarily hidden from this page.
+  // const appHost =
+  //   typeof window !== 'undefined' ? window.location.hostname : 'your app host';
+  // const savedCustomDomain = mod.custom_domain?.trim() || '';
+  // const hasSavedCustomDomain = savedCustomDomain.length > 0;
   const [iconPreview, setIconPreview] = useState<string | null>(
     mod.icon_url || null,
   );
+  // const [verifyingDomain, setVerifyingDomain] = useState(false);
 
   const { data, setData, patch, processing, errors } = useForm({
     name: mod.name,
@@ -59,6 +68,7 @@ export default function EditMod({ mod }: Props) {
     external_access: mod.external_access || false,
     github_repository_url: mod.github_repository_url || '',
     github_repository_path: mod.github_repository_path || '',
+    custom_domain: mod.custom_domain || '',
     icon: null as File | null,
   });
 
@@ -104,6 +114,35 @@ export default function EditMod({ mod }: Props) {
       window.location.href = '/dashboard/mods';
     });
   };
+
+  // const verifyDomain = async () => {
+  //   setVerifyingDomain(true);
+  //
+  //   try {
+  //     const response = await fetch(`/dashboard/mods/${mod.slug}/domain/verify`, {
+  //       method: 'POST',
+  //       headers: {
+  //         Accept: 'application/json',
+  //         'X-CSRF-TOKEN':
+  //           document
+  //             .querySelector('meta[name="csrf-token"]')
+  //             ?.getAttribute('content') || '',
+  //       },
+  //     });
+  //
+  //     if (response.ok) {
+  //       window.location.reload();
+  //       return;
+  //     }
+  //
+  //     const payload = (await response.json().catch(() => null)) as
+  //       | { message?: string }
+  //       | null;
+  //     alert(payload?.message || 'Domain verification failed.');
+  //   } finally {
+  //     setVerifyingDomain(false);
+  //   }
+  // };
 
   return (
     <AppLayout>
@@ -333,6 +372,91 @@ export default function EditMod({ mod }: Props) {
                       and manual page create/edit is disabled.
                     </p>
                   </div>
+
+                  {/*
+                    <Separator />
+
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="custom_domain">Custom Domain</Label>
+                        <Input
+                          id="custom_domain"
+                          type="text"
+                          value={data.custom_domain}
+                          onChange={(e) =>
+                            setData('custom_domain', e.target.value.toLowerCase())
+                          }
+                          placeholder="docs.example.com"
+                          className={cn(
+                            errors.custom_domain ? 'border-destructive' : '',
+                          )}
+                        />
+                        {errors.custom_domain && (
+                          <p className="mt-1 text-sm text-destructive">
+                            {errors.custom_domain}
+                          </p>
+                        )}
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          Point this host to {appHost} with a CNAME. Changing the domain resets verification.
+                        </p>
+                      </div>
+
+                      {hasSavedCustomDomain && mod.domain_verification_token && (
+                        <div className="rounded-md border p-3 text-sm">
+                          <p className="font-medium">DNS TXT verification</p>
+                          <p className="mt-1 text-muted-foreground">
+                            Add this TXT record to prove domain ownership.
+                          </p>
+                          <div className="mt-2 space-y-2">
+                            <div>
+                              <p className="text-xs font-medium uppercase text-muted-foreground">
+                                Host / Name
+                              </p>
+                              <code className="mt-1 block rounded bg-muted p-2 text-xs">
+                                {savedCustomDomain}
+                              </code>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium uppercase text-muted-foreground">
+                                Value / Content (use the full string)
+                              </p>
+                              <code className="mt-1 block rounded bg-muted p-2 text-xs">
+                                {mod.domain_verification_token}
+                              </code>
+                            </div>
+                          </div>
+                          <p className="mt-2 text-xs text-muted-foreground">
+                            Do not split the value after =. Paste the whole token exactly as shown.
+                          </p>
+                        </div>
+                      )}
+
+                      {hasSavedCustomDomain && (
+                        <div className="flex items-center gap-3">
+                          <Badge
+                            variant="outline"
+                            className={
+                              mod.domain_verified
+                                ? 'border-green-600 text-green-700'
+                                : 'border-amber-600 text-amber-700'
+                            }
+                          >
+                            {mod.domain_verified ? 'Verified' : 'Unverified'}
+                          </Badge>
+                          {!mod.domain_verified && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={verifyDomain}
+                              disabled={verifyingDomain}
+                            >
+                              {verifyingDomain ? 'Checking DNS...' : 'Verify domain'}
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  */}
 
                   <Separator />
                   <div className="flex items-center space-x-3">
