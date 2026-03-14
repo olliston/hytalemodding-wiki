@@ -455,6 +455,11 @@ class PageController extends Controller
      */
     public function publicShow(Mod $mod, Page $page, Request $request)
     {
+        $resolvedMod = $request->attributes->get('resolved_mod');
+        if ($resolvedMod instanceof Mod && $resolvedMod->id !== $mod->id) {
+            abort(404, 'Documentation not found');
+        }
+
         if ($page->mod_id !== $mod->id) {
             abort(404);
         }
@@ -522,6 +527,24 @@ class PageController extends Controller
             ],
             'navigation' => $navigation,
         ]);
+    }
+
+    /**
+     * Display a public page using a custom domain path (/page-slug).
+     */
+    public function publicShowResolved(Request $request, string $pageSlug)
+    {
+        $mod = $request->attributes->get('resolved_mod');
+
+        if (! $mod instanceof Mod) {
+            abort(404, 'Documentation not found');
+        }
+
+        $page = Page::where('mod_id', $mod->id)
+            ->where('slug', $pageSlug)
+            ->firstOrFail();
+
+        return $this->publicShow($mod, $page, $request);
     }
 
     private function serializeMod(Mod $mod): array

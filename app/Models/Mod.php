@@ -25,11 +25,15 @@ class Mod extends Model
         'github_repository_url',
         'github_repository_path',
         'custom_css',
+        'custom_domain',
+        'domain_verified',
+        'domain_verification_token',
     ];
 
     protected $casts = [
         'id' => 'string',
         'external_access' => 'boolean',
+        'domain_verified' => 'boolean',
     ];
 
     protected function customCss(): Attribute
