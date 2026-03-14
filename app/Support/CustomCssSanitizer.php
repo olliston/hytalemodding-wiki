@@ -20,7 +20,7 @@ final class CustomCssSanitizer
         '/(?:javascript|vbscript|data|file)\s*:/i' => 'Custom CSS cannot reference unsafe protocols.',
     ];
 
-    public static function normalize(null|string $css): ?string
+    public static function normalize(?string $css): ?string
     {
         if ($css === null) {
             return null;
@@ -36,7 +36,7 @@ final class CustomCssSanitizer
     /**
      * @return array<int, string>
      */
-    public static function violations(null|string $css): array
+    public static function violations(?string $css): array
     {
         $normalized = self::normalize($css);
 
@@ -55,12 +55,12 @@ final class CustomCssSanitizer
         return array_values(array_unique($violations));
     }
 
-    public static function isSafe(null|string $css): bool
+    public static function isSafe(?string $css): bool
     {
         return self::violations($css) === [];
     }
 
-    public static function sanitizeForOutput(null|string $css): ?string
+    public static function sanitizeForOutput(?string $css): ?string
     {
         $normalized = self::normalize($css);
 
@@ -71,4 +71,3 @@ final class CustomCssSanitizer
         return self::isSafe($normalized) ? $normalized : null;
     }
 }
-

@@ -459,7 +459,7 @@ class ModController extends Controller
             ->when($query, function ($q) use ($query) {
                 $q->where(function ($inner) use ($query) {
                     $inner->where('name', 'like', '%'.$query.'%')
-                          ->orWhere('description', 'like', '%'.$query.'%');
+                        ->orWhere('description', 'like', '%'.$query.'%');
                 });
             })
             ->with(['owner'])
@@ -558,7 +558,6 @@ class ModController extends Controller
             ? response()->json(['verified' => false, 'message' => $message], 422)
             : back()->withErrors(['custom_domain' => $message]);
     }
-
 
     private function publicShowForSlug(Request $request, string $slug)
     {

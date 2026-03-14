@@ -1,7 +1,7 @@
 import { css } from '@codemirror/lang-css';
 import { oneDark } from '@codemirror/theme-one-dark';
-import CodeMirror, { type ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { Head, useForm } from '@inertiajs/react';
+import CodeMirror, { type ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import {
   ChevronRightIcon,
   ExternalLinkIcon,
@@ -10,8 +10,8 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 
 interface Mod {
@@ -57,22 +57,19 @@ export default function CssEditor({ mod }: Props) {
   });
 
   // Inject/update CSS in the iframe preview
-  const injectCss = useCallback(
-    (cssText: string) => {
-      const iframe = iframeRef.current;
-      if (!iframe || !iframe.contentDocument) return;
-      let styleEl = iframe.contentDocument.getElementById(
-        'preview-custom-css',
-      ) as HTMLStyleElement | null;
-      if (!styleEl) {
-        styleEl = iframe.contentDocument.createElement('style');
-        styleEl.id = 'preview-custom-css';
-        iframe.contentDocument.head.appendChild(styleEl);
-      }
-      styleEl.textContent = cssText;
-    },
-    [],
-  );
+  const injectCss = useCallback((cssText: string) => {
+    const iframe = iframeRef.current;
+    if (!iframe || !iframe.contentDocument) return;
+    let styleEl = iframe.contentDocument.getElementById(
+      'preview-custom-css',
+    ) as HTMLStyleElement | null;
+    if (!styleEl) {
+      styleEl = iframe.contentDocument.createElement('style');
+      styleEl.id = 'preview-custom-css';
+      iframe.contentDocument.head.appendChild(styleEl);
+    }
+    styleEl.textContent = cssText;
+  }, []);
 
   const handleIframeLoad = useCallback(() => {
     setIframeLoaded(true);
@@ -97,7 +94,9 @@ export default function CssEditor({ mod }: Props) {
 
   const handleReset = () => {
     if (
-      window.confirm('Reset to the last saved CSS? Unsaved changes will be lost.')
+      window.confirm(
+        'Reset to the last saved CSS? Unsaved changes will be lost.',
+      )
     ) {
       setData('custom_css', savedCss);
     }
@@ -121,7 +120,10 @@ export default function CssEditor({ mod }: Props) {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <nav className="mb-2 flex items-center text-sm text-muted-foreground">
-              <a href={`/dashboard/mods/${mod.slug}`} className="hover:text-foreground">
+              <a
+                href={`/dashboard/mods/${mod.slug}`}
+                className="hover:text-foreground"
+              >
                 {mod.name}
               </a>
               <ChevronRightIcon className="mx-1 h-4 w-4" />
@@ -158,7 +160,9 @@ export default function CssEditor({ mod }: Props) {
               {previewVisible ? 'Hide Preview' : 'Show Preview'}
             </Button>
             <Button onClick={handleSave} disabled={processing || !isDirty}>
-              {processing && <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />}
+              {processing && (
+                <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+              )}
               Save Changes
             </Button>
           </div>
@@ -193,7 +197,9 @@ export default function CssEditor({ mod }: Props) {
               )}
               <div className="text-xs text-muted-foreground">
                 {data.custom_css.length.toLocaleString()} characters
-                {isDirty && <span className="ml-2 text-amber-600">Unsaved changes</span>}
+                {isDirty && (
+                  <span className="ml-2 text-amber-600">Unsaved changes</span>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -237,9 +243,3 @@ export default function CssEditor({ mod }: Props) {
     </AppLayout>
   );
 }
-
-
-
-
-
-

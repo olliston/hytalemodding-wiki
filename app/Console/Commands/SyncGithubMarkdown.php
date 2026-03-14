@@ -74,4 +74,3 @@ class SyncGithubMarkdown extends Command
         return $hasErrors ? self::FAILURE : self::SUCCESS;
     }
 }
-

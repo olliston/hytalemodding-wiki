@@ -1,6 +1,6 @@
 import DOMPurify from 'dompurify';
 import hljs from 'highlight.js';
-import { CheckIcon, ClipboardIcon, LinkIcon } from 'lucide-react';
+import { CheckIcon, LinkIcon } from 'lucide-react';
 import { marked } from 'marked';
 import markedFootnote from 'marked-footnote';
 import { gfmHeadingId } from 'marked-gfm-heading-id';
@@ -33,8 +33,12 @@ marked.setOptions({
   breaks: true,
 });
 
-const CLIPBOARD_ICON_SVG = renderToStaticMarkup(<LinkIcon size={16} aria-hidden="true" />);
-const CHECK_ICON_SVG = renderToStaticMarkup(<CheckIcon size={16} aria-hidden="true" />);
+const CLIPBOARD_ICON_SVG = renderToStaticMarkup(
+  <LinkIcon size={16} aria-hidden="true" />,
+);
+const CHECK_ICON_SVG = renderToStaticMarkup(
+  <CheckIcon size={16} aria-hidden="true" />,
+);
 
 function addHeadingAnchors(html: string): string {
   const parser = new DOMParser();
@@ -90,7 +94,9 @@ export default function MarkdownRenderer({
     if (!container) return;
 
     const handleClick = (e: MouseEvent) => {
-      const btn = (e.target as Element).closest('.copy-heading-btn') as HTMLElement | null;
+      const btn = (e.target as Element).closest(
+        '.copy-heading-btn',
+      ) as HTMLElement | null;
       if (!btn) return;
 
       const headingId = btn.getAttribute('data-heading-id');

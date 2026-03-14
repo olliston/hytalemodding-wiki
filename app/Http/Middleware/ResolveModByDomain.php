@@ -58,4 +58,3 @@ class ResolveModByDomain
         return str_ends_with($host, '.localhost');
     }
 }
-

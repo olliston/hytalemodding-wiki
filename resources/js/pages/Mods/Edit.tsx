@@ -154,7 +154,10 @@ export default function EditMod({ mod }: Props) {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <nav className="mb-4 flex items-center justify-between text-sm text-primary">
             <div>
-              <a href={`/dashboard/mods/${mod.slug}`} className="hover:underline">
+              <a
+                href={`/dashboard/mods/${mod.slug}`}
+                className="hover:underline"
+              >
                 {mod.name}
               </a>
               <ChevronRightIcon className="m-1 inline h-4 w-4" />

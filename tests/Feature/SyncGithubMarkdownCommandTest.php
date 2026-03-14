@@ -74,8 +74,8 @@ class SyncGithubMarkdownCommandTest extends TestCase
                 ],
             ], 200),
             'https://raw.githubusercontent.com/acme/docs-repo/main/docs/README.md' => Http::response("# Welcome\n\nRoot docs", 200),
-            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/getting-started.md' => Http::response("# Getting Started", 200),
-            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/README.md' => Http::response("# Guide", 200),
+            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/getting-started.md' => Http::response('# Getting Started', 200),
+            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/README.md' => Http::response('# Guide', 200),
             'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/install.md' => Http::response("---\ntitle: Installation Guide\norder: 7\npublished: false\n---\n# Install", 200),
         ]);
 
@@ -233,10 +233,9 @@ class SyncGithubMarkdownCommandTest extends TestCase
                 ],
             ], 200),
             'https://raw.githubusercontent.com/acme/docs-repo/main/docs/README.md' => Http::response("# Welcome\n\nRoot docs", 200),
-            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/getting-started.md' => Http::response("# Getting Started", 200),
-            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/README.md' => Http::response("# Guide", 200),
+            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/getting-started.md' => Http::response('# Getting Started', 200),
+            'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/README.md' => Http::response('# Guide', 200),
             'https://raw.githubusercontent.com/acme/docs-repo/main/docs/guide/install.md' => Http::response($installContent, 200),
         ]);
     }
 }
-

@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Mod;
-use App\Models\Page;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -386,5 +385,4 @@ class ModTest extends TestCase
             'custom_css' => null,
         ]);
     }
-
 }

@@ -65,7 +65,10 @@ export default function PublicPage({ mod, page, navigation }: Props) {
 
   const renderNavigation = (pages: NavigationPage[], level = 0) => {
     return pages.map((navPage) => (
-      <div key={navPage.id} style={{ marginLeft: level === 0 ? 0 : level * 12 }}>
+      <div
+        key={navPage.id}
+        style={{ marginLeft: level === 0 ? 0 : level * 12 }}
+      >
         {navPage.kind === 'category' ? (
           <div className="flex items-center gap-2 rounded-lg border border-transparent px-3 py-2 text-sm text-muted-foreground/90">
             <BookOpenIcon className="h-4 w-4 shrink-0" />
@@ -185,7 +188,9 @@ export default function PublicPage({ mod, page, navigation }: Props) {
           <Card className="mb-8 overflow-hidden rounded-2xl border-border/70 bg-card/95 shadow-sm">
             <CardHeader className="border-b border-border/60 bg-muted/10">
               <div className="space-y-2">
-                <CardTitle className="break-words text-2xl sm:text-3xl">{page.title}</CardTitle>
+                <CardTitle className="text-2xl break-words sm:text-3xl">
+                  {page.title}
+                </CardTitle>
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span>Last updated {formatDate(page.updated_at)}</span>
                   {!page.published && <Badge variant="outline">Draft</Badge>}
@@ -194,7 +199,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
             </CardHeader>
 
             <CardContent className="p-8">
-              <div className="prose max-w-none min-w-0 break-words [overflow-wrap:anywhere] prose-code:break-words prose-pre:max-w-full prose-pre:overflow-x-auto prose-gray dark:prose-invert">
+              <div className="prose max-w-none min-w-0 [overflow-wrap:anywhere] break-words prose-gray dark:prose-invert prose-code:break-words prose-pre:max-w-full prose-pre:overflow-x-auto">
                 <MarkdownRenderer
                   content={
                     page.kind === 'category' && !page.content
@@ -224,7 +229,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
                           <div className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                             Previous
                           </div>
-                          <div className="line-clamp-2 break-words font-semibold text-foreground group-hover:text-primary">
+                          <div className="line-clamp-2 font-semibold break-words text-foreground group-hover:text-primary">
                             {prevPage.title}
                           </div>
                         </div>
@@ -249,7 +254,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
                           <div className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                             Next
                           </div>
-                          <div className="line-clamp-2 break-words font-semibold text-foreground group-hover:text-primary">
+                          <div className="line-clamp-2 font-semibold break-words text-foreground group-hover:text-primary">
                             {nextPage.title}
                           </div>
                         </div>
@@ -281,10 +286,10 @@ export default function PublicPage({ mod, page, navigation }: Props) {
                             href={`/mod/${mod.slug}/${child.slug}`}
                             className="group block"
                           >
-                            <h4 className="mb-2 break-words font-medium text-foreground group-hover:text-primary">
+                            <h4 className="mb-2 font-medium break-words text-foreground group-hover:text-primary">
                               {child.title}
                             </h4>
-                            <p className="break-words text-sm text-muted-foreground">
+                            <p className="text-sm break-words text-muted-foreground">
                               {getMarkdownPreview(child.content || '', 120)}
                             </p>
                           </a>

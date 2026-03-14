@@ -170,7 +170,7 @@ export default function PublicMod({ mod }: Props) {
                   Last updated {formatDate(mod.index_page.updated_at)}
                 </p>
               </CardHeader>
-              <CardContent className="prose max-w-none min-w-0 break-words p-8 [overflow-wrap:anywhere] prose-code:break-words prose-pre:max-w-full prose-pre:overflow-x-auto prose-gray dark:prose-invert">
+              <CardContent className="prose max-w-none min-w-0 p-8 [overflow-wrap:anywhere] break-words prose-gray dark:prose-invert prose-code:break-words prose-pre:max-w-full prose-pre:overflow-x-auto">
                 <MarkdownRenderer content={mod.index_page.content || ''} />
               </CardContent>
             </Card>

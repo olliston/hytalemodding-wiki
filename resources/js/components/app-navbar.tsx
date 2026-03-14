@@ -159,16 +159,18 @@ export default function AppNavbar({
                           size="sm"
                           className="justify-start"
                         >
-                          <Link href={login()} onClick={() => setIsMobileMenuOpen(false)}>
+                          <Link
+                            href={login()}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
                             Log In
                           </Link>
                         </Button>
-                        <Button
-                          asChild
-                          size="sm"
-                          className="justify-start"
-                        >
-                          <Link href={register()} onClick={() => setIsMobileMenuOpen(false)}>
+                        <Button asChild size="sm" className="justify-start">
+                          <Link
+                            href={register()}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
                             Register
                           </Link>
                         </Button>
