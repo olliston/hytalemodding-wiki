@@ -52,11 +52,11 @@ export default function PublicMod({ mod }: Props) {
 
   const renderPageTree = (pages: Page[], level = 0) => {
     return pages.map((page) => (
-      <div key={page.id} className={`ml-${level * 3}`}>
+      <div key={page.id} style={{ marginLeft: level === 0 ? 0 : level * 12 }}>
         {page.kind === 'category' ? (
-          <div className="flex items-center rounded-md px-3 py-2 text-sm">
-            <BookOpenIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-            <span className="text-foreground">{page.title}</span>
+          <div className="flex items-center gap-2 rounded-lg border border-transparent px-3 py-2 text-sm">
+            <BookOpenIcon className="h-4 w-4 text-muted-foreground" />
+            <span className="truncate text-foreground">{page.title}</span>
             {!page.published && (
               <Badge variant="outline" className="ml-2 text-xs">
                 Draft
@@ -66,10 +66,10 @@ export default function PublicMod({ mod }: Props) {
         ) : (
           <a
             href={`/mod/${mod.slug}/${page.slug}`}
-            className="group flex items-center rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
+            className="group flex items-center gap-2 rounded-lg border border-transparent px-3 py-2 text-sm transition-all duration-200 hover:border-border/70 hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:outline-none"
           >
-            <BookOpenIcon className="mr-2 h-4 w-4 text-muted-foreground group-hover:text-foreground" />
-            <span className="text-foreground group-hover:text-accent-foreground">
+            <BookOpenIcon className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
+            <span className="truncate text-foreground group-hover:text-accent-foreground">
               {page.title}
             </span>
             {!page.published && (
@@ -80,7 +80,7 @@ export default function PublicMod({ mod }: Props) {
           </a>
         )}
         {page.children && page.children.length > 0 && (
-          <div className="ml-3 border-l border-border/50 pl-3">
+          <div className="ml-2 border-l border-border/60 pl-2">
             {renderPageTree(page.children, level + 1)}
           </div>
         )}
@@ -100,14 +100,18 @@ export default function PublicMod({ mod }: Props) {
     >
       <Head title={`${mod.name} Documentation`} />
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
-        <div className="lg:col-span-1">
-          <div className="sticky top-6 space-y-6">
-            <Card>
-              <CardHeader className="pb-4">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8 xl:gap-10">
+        <aside className="lg:col-span-4 xl:col-span-3">
+          <div className="sticky top-20 space-y-4">
+            <div className="px-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+              Mod Details
+            </div>
+
+            <Card className="overflow-hidden rounded-2xl border-border/70 bg-card/90 shadow-sm backdrop-blur-sm">
+              <CardHeader className="pb-3">
                 <CardTitle className="text-lg">About</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-2 pt-0">
                 <p className="text-sm text-muted-foreground">
                   {mod.description}
                 </p>
@@ -125,11 +129,13 @@ export default function PublicMod({ mod }: Props) {
             </Card>
 
             {/* Navigation Card */}
-            <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg">Documentation</CardTitle>
+            <Card className="overflow-hidden rounded-2xl border-border/70 bg-card/90 shadow-sm backdrop-blur-sm">
+              <CardHeader className="border-b border-border/60 pb-3">
+                <CardTitle className="text-sm font-semibold tracking-wide uppercase">
+                  Documentation
+                </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-3">
                 {mod.root_pages.length === 0 ? (
                   <div className="py-8 text-center">
                     <BookOpenIcon className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
@@ -138,20 +144,20 @@ export default function PublicMod({ mod }: Props) {
                     </p>
                   </div>
                 ) : (
-                  <nav className="space-y-1">
+                  <nav className="space-y-1 rounded-xl border border-border/60 bg-muted/10 p-2">
                     {renderPageTree(mod.root_pages)}
                   </nav>
                 )}
               </CardContent>
             </Card>
           </div>
-        </div>
+        </aside>
 
         {/* Main Content */}
-        <div className="lg:col-span-3">
+        <main className="min-w-0 lg:col-span-8 xl:col-span-9">
           {mod.index_page ? (
-            <Card>
-              <CardHeader>
+            <Card className="overflow-hidden rounded-2xl border-border/70 bg-card/95 shadow-sm">
+              <CardHeader className="border-b border-border/60 bg-muted/10">
                 <div className="flex items-center space-x-2">
                   <BookOpenIcon className="h-5 w-5 text-primary" />
                   <CardTitle className="text-xl">
@@ -162,12 +168,12 @@ export default function PublicMod({ mod }: Props) {
                   Last updated {formatDate(mod.index_page.updated_at)}
                 </p>
               </CardHeader>
-              <CardContent className="prose max-w-none prose-gray dark:prose-invert">
+              <CardContent className="prose max-w-none min-w-0 break-words p-8 [overflow-wrap:anywhere] prose-code:break-words prose-pre:max-w-full prose-pre:overflow-x-auto prose-gray dark:prose-invert">
                 <MarkdownRenderer content={mod.index_page.content || ''} />
               </CardContent>
             </Card>
           ) : (
-            <Card>
+            <Card className="overflow-hidden rounded-2xl border-border/70 bg-card/95 shadow-sm">
               <CardHeader>
                 <CardTitle className="text-xl">Welcome to {mod.name}</CardTitle>
                 <p className="text-muted-foreground">{mod.description}</p>
@@ -190,7 +196,7 @@ export default function PublicMod({ mod }: Props) {
                       {featuredPages.map((page) => (
                         <Card
                           key={page.id}
-                          className="text-left transition-shadow hover:shadow-md"
+                          className="border-border/60 bg-background/70 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5"
                         >
                           <CardContent className="p-4">
                             <a
@@ -213,7 +219,7 @@ export default function PublicMod({ mod }: Props) {
               </CardContent>
             </Card>
           )}
-        </div>
+        </main>
       </div>
     </PublicLayout>
   );
