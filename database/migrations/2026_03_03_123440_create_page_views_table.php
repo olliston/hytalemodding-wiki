@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('page_id')->references('id')->on('pages')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
 
             $table->index(['page_id', 'viewed_at']);
             $table->index(['user_id', 'viewed_at']);
