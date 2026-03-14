@@ -73,21 +73,17 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
 
     const { source, destination, draggableId } = result;
 
-    // Find the dragged page
     const draggedPage = pagesList.find((p) => p.id === draggableId);
     if (!draggedPage) return;
 
-    // Get all pages with the same parent as the dragged page
     const sameLevelPages = pagesList
       .filter((p) => p.parent_id === draggedPage.parent_id)
       .sort((a, b) => a.order_index - b.order_index);
 
-    // Create a new array with the reordered pages
     const reorderedPages = Array.from(sameLevelPages);
     const [removed] = reorderedPages.splice(source.index, 1);
     reorderedPages.splice(destination.index, 0, removed);
 
-    // Update order_index for all pages at this level
     const pagesToUpdate = reorderedPages.map((page, index) => ({
       id: page.id,
       parent_id: page.parent_id || null,
@@ -97,7 +93,6 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
     setIsDragDisabled(true);
 
     try {
-      // Send to backend using form submission
       router.post(
         `/dashboard/mods/${mod.slug}/pages/reorder`,
         {
@@ -107,7 +102,6 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
           preserveState: true,
           preserveScroll: true,
           onSuccess: () => {
-            // Update local state with new order
             const newPagesList = pagesList.map((page) => {
               const updatedPage = pagesToUpdate.find((p) => p.id === page.id);
               return updatedPage
@@ -117,7 +111,6 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
             setPagesList(newPagesList);
           },
           onError: () => {
-            // Revert to original state on error
             setPagesList(pages);
           },
           onFinish: () => {
@@ -155,24 +148,20 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
             snapshot.isDragging ? 'bg-accent shadow-lg' : ''
           } ${isDragModeEnabled && canEdit ? 'hover:bg-accent' : ''}`}
         >
-          {/* Hierarchy + Title Column */}
           <td className="w-1/2 py-2 pr-4">
             <div className="flex items-center">
-              {/* Hierarchy visualization */}
               <div
                 className="mr-2 flex items-center"
                 style={{ minWidth: `${level * 16}px` }}
               >
                 {level > 0 && (
                   <div className="flex items-center">
-                    {/* Ancestor lines */}
                     {ancestorLines.map((hasLine, i) => (
                       <div
                         key={i}
                         className={`h-6 w-4 ${hasLine ? 'border-l border-border' : ''}`}
                       />
                     ))}
-                    {/* Current level connector */}
                     <div className="relative h-6 w-4">
                       <div
                         className={`absolute top-0 left-0 h-3 w-3 border-b border-l border-border`}
@@ -185,7 +174,6 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
                 )}
               </div>
 
-              {/* Drag handle */}
               {canEdit && isDragModeEnabled && (
                 <div
                   {...provided.dragHandleProps}
@@ -196,7 +184,6 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
                 </div>
               )}
 
-              {/* Page type indicator */}
               <div
                 className={`mr-2 h-2 w-2 shrink-0 rounded-full ${
                   page.kind === 'category' ? 'bg-blue-500' : 'bg-gray-400'
@@ -288,7 +275,7 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
     level = 0,
     ancestorLines: boolean[] = [],
   ) => {
-    const sortedPages = pageList.sort((a, b) => a.order_index - b.order_index);
+    const sortedPages = [...pageList].sort((a, b) => a.order_index - b.order_index);
     const droppableId = parentId ? `pages-${parentId}` : 'pages-root';
 
     return (
@@ -316,7 +303,6 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
                     ancestorLines,
                   )}
 
-                  {/* Render child pages */}
                   {page.children &&
                     page.children.length > 0 &&
                     renderPageList(
@@ -339,15 +325,45 @@ export default function PagesIndex({ mod, pages, canEdit }: Props) {
     );
   };
 
-  // Group pages by parent
-  const rootPages = pagesList.filter((page) => !page.parent_id);
-  const childPages = pagesList.filter((page) => page.parent_id);
+  const buildPageTree = (allPages: Page[]) => {
+    const childrenByParent = new Map<string | null, Page[]>();
 
-  // Attach children to their parents
-  const pagesWithChildren = rootPages.map((page) => ({
-    ...page,
-    children: childPages.filter((child) => child.parent_id === page.id),
-  }));
+    allPages.forEach((page) => {
+      const parentKey = page.parent_id ?? null;
+      const siblings = childrenByParent.get(parentKey) ?? [];
+      siblings.push(page);
+      childrenByParent.set(parentKey, siblings);
+    });
+
+    childrenByParent.forEach((siblings) => {
+      siblings.sort((a, b) => a.order_index - b.order_index);
+    });
+
+    const attachChildren = (
+      parentId: string | null,
+      visited: Set<string> = new Set(),
+    ): Page[] => {
+      return (childrenByParent.get(parentId) ?? []).map((page) => {
+        if (visited.has(page.id)) {
+          return { ...page, children: [] };
+        }
+
+        const nextVisited = new Set(visited);
+        nextVisited.add(page.id);
+
+        return {
+          ...page,
+          children: attachChildren(page.id, nextVisited),
+        };
+      });
+    };
+
+    return attachChildren(null);
+  };
+
+  const pagesWithChildren = buildPageTree(pagesList);
+  const rootPages = pagesWithChildren;
+  const childPages = pagesList.filter((page) => page.parent_id);
 
   return (
     <AppLayout>
