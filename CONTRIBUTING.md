@@ -32,9 +32,12 @@ We welcome suggestions for new features or improvements:
 
 ### Prerequisites
 
+- Node.js 18.x or higher
+- [Bun](https://bun.sh/) (install with `npm install -g bun`)
 - PHP 8.2 or higher
 - [Composer](https://getcomposer.org/) (PHP dependency manager)
-- [Bun](https://bun.sh/) (install with `npm install -g bun`)
+- Git
+- A text editor (VS Code, Cursor, etc.)
 
 ### PHP Extensions
 
@@ -166,8 +169,7 @@ For PHP code, run:
 Contributors are recognized in several ways:
 
 - Listed in the repository's contributors
-- Building a portfolio of documentation work
-- If you wrote a guide, it'll show that you are the author at the end of the page.
+- Building a portfolio of open source work
 
 ## Questions?
 
