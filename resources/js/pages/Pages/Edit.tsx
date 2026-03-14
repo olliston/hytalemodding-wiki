@@ -31,7 +31,7 @@ interface Page {
   title: string;
   slug: string;
   kind: 'page' | 'category';
-  content: string;
+  content: string | null;
   is_index: boolean;
   published: boolean;
   parent_id?: string;
@@ -52,11 +52,13 @@ interface Props {
 const MIN_EDITOR_LINES = 30;
 
 export default function EditPage({ mod, page, potentialParents }: Props) {
+  const initialContent = page.content ?? '';
+
   // Form state management
   const { data, setData, patch, processing, errors } = useForm({
     title: page.title,
     kind: page.kind,
-    content: page.content,
+    content: initialContent,
     parent_id: page.parent_id || '',
     is_index: page.is_index,
     published: page.published,

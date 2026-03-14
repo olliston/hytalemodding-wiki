@@ -7,7 +7,7 @@ import 'highlight.js/styles/github-dark.css';
 import { useEffect, useState } from 'react';
 
 interface MarkdownRendererProps {
-  content: string;
+  content: string | null | undefined;
   className?: string;
 }
 
@@ -36,15 +36,16 @@ export default function MarkdownRenderer({
   className = '',
 }: MarkdownRendererProps) {
   const [htmlContent, setHtmlContent] = useState('');
+  const safeContent = content ?? '';
 
   useEffect(() => {
     const parseContent = async () => {
-      const html = await marked.parse(content);
+      const html = await marked.parse(safeContent);
       setHtmlContent(DOMPurify.sanitize(html));
     };
 
     parseContent();
-  }, [content]);
+  }, [safeContent]);
 
   return (
     <div
