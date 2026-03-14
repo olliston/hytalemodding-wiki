@@ -1,5 +1,3 @@
-# Security Policy
+# Reporting a Vulnerability
 
-## Reporting a Vulnerability
-
-Report security vulnerabilities to hello@hytalemodding.dev.
+To report a vulnerability, please open a private vulnerability report at https://github.com/HytaleModding/wiki/security or email us at hello@hytalemodding.dev
