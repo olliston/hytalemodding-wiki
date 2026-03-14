@@ -67,7 +67,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
     return pages.map((navPage) => (
       <div
         key={navPage.id}
-        style={{ marginLeft: level === 0 ? 0 : level * 12 }}
+        style={{ marginLeft: level === 0 ? 0 : level * 2 }}
       >
         {navPage.kind === 'category' ? (
           <div className="flex items-center gap-2 rounded-lg border border-transparent px-3 py-2 text-sm text-muted-foreground/90">
@@ -170,13 +170,13 @@ export default function PublicPage({ mod, page, navigation }: Props) {
             </Card>
 
             {/* Navigation */}
-            <Card className="overflow-hidden rounded-2xl border-border/70 bg-card/90 shadow-sm backdrop-blur-sm">
+            <Card className="overflow-hidden gap-0 rounded-2xl border-border/70 bg-card/90 shadow-sm backdrop-blur-sm">
               <CardHeader className="border-b border-border/60 pb-3">
                 <CardTitle className="text-sm font-semibold tracking-wide uppercase">
                   Contents
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-3">
+              <CardContent className="p-3">
                 {navigation.length === 0 ? (
                   <div className="py-4 text-center">
                     <BookOpenIcon className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
@@ -185,7 +185,7 @@ export default function PublicPage({ mod, page, navigation }: Props) {
                     </p>
                   </div>
                 ) : (
-                  <nav className="space-y-1 rounded-xl border border-border/60 bg-muted/10 p-2">
+                  <nav>
                     {renderNavigation(navigation)}
                   </nav>
                 )}
