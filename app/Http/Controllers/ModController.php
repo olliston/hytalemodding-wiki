@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\CollaboratorInvitation;
 use App\Models\Mod;
 use App\Models\ModInvitation;
+use App\Models\Page;
 use App\Models\User;
 use App\Support\CustomCssSanitizer;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -589,12 +590,16 @@ class ModController extends Controller
 
     private function buildPublicModPayload(Mod $mod): array
     {
+        $publishedChildren = function ($query) use (&$publishedChildren) {
+            $query->where('published', true)
+                ->orderBy('order_index')
+                ->with(['children' => $publishedChildren]);
+        };
+
         $rootPages = $mod->pages()
             ->whereNull('parent_id')
             ->where('published', true)
-            ->with(['children' => function ($query) {
-                $query->where('published', true)->orderBy('order_index');
-            }])
+            ->with(['children' => $publishedChildren])
             ->orderBy('order_index')
             ->get();
 
@@ -612,26 +617,10 @@ class ModController extends Controller
             'visibility' => $mod->visibility,
             'custom_domain' => $mod->custom_domain,
             'owner' => $this->serializeOwner($mod->owner),
-            'root_pages' => $rootPages->map(function ($page) {
-                return [
-                    'id' => $page->id,
-                    'title' => $page->title,
-                    'slug' => $page->slug,
-                    'kind' => $page->kind,
-                    'content' => substr($page->content ?? '', 0, 200),
-                    'published' => $page->published,
-                    'updated_at' => $page->updated_at,
-                    'children' => $page->children->map(function ($child) {
-                        return [
-                            'id' => $child->id,
-                            'title' => $child->title,
-                            'slug' => $child->slug,
-                            'kind' => $child->kind,
-                            'published' => $child->published,
-                        ];
-                    })->toArray(),
-                ];
-            }),
+            'root_pages' => $rootPages
+                ->map(fn (Page $page) => $this->serializePublicPageTree($page, true))
+                ->values()
+                ->toArray(),
             'index_page' => $indexPage ? [
                 'id' => $indexPage->id,
                 'title' => $indexPage->title,
@@ -681,6 +670,28 @@ class ModController extends Controller
             'username' => $owner->username,
             'avatar_url' => $owner->avatar_url,
         ];
+    }
+
+    private function serializePublicPageTree(Page $page, bool $includeContent): array
+    {
+        $payload = [
+            'id' => $page->id,
+            'title' => $page->title,
+            'slug' => $page->slug,
+            'kind' => $page->kind,
+            'published' => $page->published,
+            'updated_at' => $page->updated_at,
+            'children' => $page->children
+                ->map(fn (Page $child) => $this->serializePublicPageTree($child, false))
+                ->values()
+                ->toArray(),
+        ];
+
+        if ($includeContent) {
+            $payload['content'] = substr($page->content ?? '', 0, 200);
+        }
+
+        return $payload;
     }
 
     /**

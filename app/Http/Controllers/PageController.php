@@ -480,30 +480,19 @@ class PageController extends Controller
             $query->where('published', true)->orderBy('order_index');
         }]);
 
+        $publishedChildren = function ($query) use (&$publishedChildren) {
+            $query->where('published', true)
+                ->orderBy('order_index')
+                ->with(['children' => $publishedChildren]);
+        };
+
         $navigation = $mod->pages()
             ->whereNull('parent_id')
             ->where('published', true)
-            ->with(['children' => function ($query) {
-                $query->where('published', true)->orderBy('order_index');
-            }])
+            ->with(['children' => $publishedChildren])
             ->orderBy('order_index')
             ->get()
-            ->map(function ($navPage) {
-                return [
-                    'id' => $navPage->id,
-                    'title' => $navPage->title,
-                    'slug' => $navPage->slug,
-                    'kind' => $navPage->kind,
-                    'children' => $navPage->children->map(function ($child) {
-                        return [
-                            'id' => $child->id,
-                            'title' => $child->title,
-                            'slug' => $child->slug,
-                            'kind' => $child->kind,
-                        ];
-                    })->toArray(),
-                ];
-            });
+            ->map(fn (Page $navPage) => $this->serializeNavigationPage($navPage));
 
         return Inertia::render('Public/Page', [
             'mod' => $this->serializeMod($mod->load(['owner'])),
@@ -569,6 +558,20 @@ class PageController extends Controller
             'name' => $owner->name,
             'username' => $owner->username,
             'avatar_url' => $owner->avatar_url,
+        ];
+    }
+
+    private function serializeNavigationPage(Page $page): array
+    {
+        return [
+            'id' => $page->id,
+            'title' => $page->title,
+            'slug' => $page->slug,
+            'kind' => $page->kind,
+            'children' => $page->children
+                ->map(fn (Page $child) => $this->serializeNavigationPage($child))
+                ->values()
+                ->toArray(),
         ];
     }
 }

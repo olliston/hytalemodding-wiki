@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Mod;
+use App\Models\Page;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -214,6 +215,46 @@ class ModTest extends TestCase
         $response = $this->get("/mod/{$mod->slug}");
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page->component('Public/Mod'));
+    }
+
+    public function test_public_mod_navigation_includes_nested_descendants()
+    {
+        $owner = User::factory()->create();
+        $mod = Mod::factory()->public()->create(['owner_id' => $owner->id]);
+
+        $rootCategory = Page::factory()->category()->published()->create([
+            'mod_id' => $mod->id,
+            'parent_id' => null,
+            'title' => 'Guides',
+            'slug' => 'guides',
+            'order_index' => 0,
+        ]);
+
+        $childCategory = Page::factory()->category()->published()->create([
+            'mod_id' => $mod->id,
+            'parent_id' => $rootCategory->id,
+            'title' => 'Advanced',
+            'slug' => 'advanced',
+            'order_index' => 0,
+        ]);
+
+        Page::factory()->published()->create([
+            'mod_id' => $mod->id,
+            'parent_id' => $childCategory->id,
+            'title' => 'Deep Topic',
+            'slug' => 'deep-topic',
+            'order_index' => 0,
+        ]);
+
+        $response = $this->get(route('public.mod', $mod));
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $inertia) => $inertia
+            ->component('Public/Mod')
+            ->where('mod.root_pages.0.slug', 'guides')
+            ->where('mod.root_pages.0.children.0.slug', 'advanced')
+            ->where('mod.root_pages.0.children.0.children.0.slug', 'deep-topic')
+        );
     }
 
     public function test_public_mod_page_does_not_expose_owner_email()
