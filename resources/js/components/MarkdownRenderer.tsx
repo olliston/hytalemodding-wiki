@@ -7,6 +7,7 @@ import { gfmHeadingId } from 'marked-gfm-heading-id';
 import 'highlight.js/styles/github-dark.css';
 import { useEffect, useRef, useState } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import markedAlert from 'marked-alert';
 
 interface MarkdownRendererProps {
   content: string | null | undefined;
@@ -26,7 +27,7 @@ renderer.codespan = function ({ text }: { text: string }) {
   return `<code class="inline-code">${text}</code>`;
 };
 
-marked.use(gfmHeadingId(), markedFootnote(), { renderer });
+marked.use(gfmHeadingId(), markedFootnote(), markedAlert(), { renderer });
 
 marked.setOptions({
   gfm: true,
