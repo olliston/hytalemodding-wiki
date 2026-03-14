@@ -329,6 +329,50 @@ class PageTest extends TestCase
         $response->assertRedirect(route('pages.show', [$mod, $page]));
     }
 
+    public function test_edit_page_hides_descendants_from_parent_options()
+    {
+        $owner = User::factory()->create();
+        $mod = Mod::factory()->create(['owner_id' => $owner->id]);
+        $page = Page::factory()->create(['mod_id' => $mod->id, 'title' => 'Root']);
+        $child = Page::factory()->create(['mod_id' => $mod->id, 'parent_id' => $page->id, 'title' => 'Child']);
+        $grandchild = Page::factory()->create(['mod_id' => $mod->id, 'parent_id' => $child->id, 'title' => 'Grandchild']);
+        $validParent = Page::factory()->create(['mod_id' => $mod->id, 'title' => 'Valid Parent']);
+
+        $this->actingAs($owner);
+
+        $response = $this->get(route('pages.edit', [$mod, $page]));
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $inertia) => $inertia
+            ->component('Pages/Edit')
+            ->has('potentialParents', 1)
+            ->where('potentialParents.0.id', $validParent->id)
+            ->missing('potentialParents.1')
+        );
+    }
+
+    public function test_page_cannot_be_reparented_to_its_descendant()
+    {
+        $owner = User::factory()->create();
+        $mod = Mod::factory()->create(['owner_id' => $owner->id]);
+        $page = Page::factory()->create(['mod_id' => $mod->id, 'title' => 'Root']);
+        $child = Page::factory()->create(['mod_id' => $mod->id, 'parent_id' => $page->id, 'title' => 'Child']);
+
+        $this->actingAs($owner);
+
+        $response = $this->patch(route('pages.update', [$mod, $page]), [
+            'title' => $page->title,
+            'content' => $page->content,
+            'parent_id' => $child->id,
+            'is_index' => $page->is_index,
+            'published' => $page->published,
+        ]);
+
+        $response->assertStatus(422);
+        $page->refresh();
+        $this->assertNull($page->parent_id);
+    }
+
     public function test_editor_can_update_page()
     {
         $owner = User::factory()->create();

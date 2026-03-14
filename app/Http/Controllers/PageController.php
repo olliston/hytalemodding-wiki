@@ -236,9 +236,11 @@ class PageController extends Controller
         $this->ensureManualPageEditingAllowed($mod);
 
         $page->load(['parent']);
+        $descendantIds = $this->getDescendantIds($page);
 
         $potentialParents = $mod->pages()
             ->where('id', '!=', $page->id)
+            ->when($descendantIds !== [], fn ($query) => $query->whereNotIn('id', $descendantIds))
             ->orderBy('title')
             ->get();
 
@@ -280,6 +282,10 @@ class PageController extends Controller
         if ($validated['parent_id'] ?? null) {
             $parent = Page::findOrFail($validated['parent_id']);
             if ($parent->mod_id !== $mod->id || $parent->id === $page->id) {
+                abort(422, 'Invalid parent page.');
+            }
+
+            if (in_array($parent->id, $this->getDescendantIds($page), true)) {
                 abort(422, 'Invalid parent page.');
             }
         }
@@ -404,6 +410,34 @@ class PageController extends Controller
         if (! blank($mod->github_repository_url)) {
             abort(423, 'This mod is managed by GitHub sync. Manual page creation and editing are disabled.');
         }
+    }
+
+    /**
+     * Get all descendant page IDs for a page in the same mod.
+     *
+     * @return array<int, string>
+     */
+    private function getDescendantIds(Page $page): array
+    {
+        $descendantIds = [];
+        $currentParentIds = [$page->id];
+
+        while ($currentParentIds !== []) {
+            $childIds = Page::query()
+                ->where('mod_id', $page->mod_id)
+                ->whereIn('parent_id', $currentParentIds)
+                ->pluck('id')
+                ->all();
+
+            if ($childIds === []) {
+                break;
+            }
+
+            $descendantIds = array_merge($descendantIds, $childIds);
+            $currentParentIds = $childIds;
+        }
+
+        return $descendantIds;
     }
 
     /**
