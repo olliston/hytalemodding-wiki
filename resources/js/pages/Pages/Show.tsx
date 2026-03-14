@@ -66,7 +66,7 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
     return pages
       .filter((navPage) => navPage.published || canEdit)
       .map((navPage) => (
-        <div key={navPage.id} className={`ml-${level * 4}`}>
+        <div key={navPage.id} style={{ marginLeft: `${level * 16}px` }}>
           <div className="flex items-center gap-2">
             <a
               href={`/dashboard/mods/${mod.slug}/pages/${navPage.slug}`}
@@ -90,11 +90,8 @@ export default function ShowPage({ mod, page, navigation, canEdit }: Props) {
               </span>
             )}
           </div>
-          {navPage.children && navPage.children.length > 0 && (
-            <div className="ml-4">
-              {renderNavigation(navPage.children, level + 1)}
-            </div>
-          )}
+          {navPage.children && navPage.children.length > 0 &&
+            renderNavigation(navPage.children, level + 1)}
         </div>
       ));
   };

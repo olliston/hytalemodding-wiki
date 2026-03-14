@@ -209,6 +209,48 @@ class PageTest extends TestCase
         );
     }
 
+    public function test_dashboard_page_navigation_includes_nested_descendants()
+    {
+        $owner = User::factory()->create();
+        $mod = Mod::factory()->create(['owner_id' => $owner->id]);
+
+        $rootCategory = Page::factory()->category()->published()->create([
+            'mod_id' => $mod->id,
+            'parent_id' => null,
+            'title' => 'Guides',
+            'slug' => 'guides',
+            'order_index' => 0,
+        ]);
+
+        $childCategory = Page::factory()->category()->create([
+            'mod_id' => $mod->id,
+            'parent_id' => $rootCategory->id,
+            'title' => 'Advanced',
+            'slug' => 'advanced',
+            'order_index' => 0,
+        ]);
+
+        $leafPage = Page::factory()->create([
+            'mod_id' => $mod->id,
+            'parent_id' => $childCategory->id,
+            'title' => 'Deep Topic',
+            'slug' => 'deep-topic',
+            'order_index' => 0,
+        ]);
+
+        $this->actingAs($owner);
+
+        $response = $this->get(route('pages.show', ['mod' => $mod, 'page' => $leafPage]));
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $inertia) => $inertia
+            ->component('Pages/Show')
+            ->where('navigation.0.slug', 'guides')
+            ->where('navigation.0.children.0.slug', 'advanced')
+            ->where('navigation.0.children.0.children.0.slug', 'deep-topic')
+        );
+    }
+
     public function test_public_page_does_not_expose_owner_email()
     {
         $owner = User::factory()->create(['email' => 'owner@example.com']);

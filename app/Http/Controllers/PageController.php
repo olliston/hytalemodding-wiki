@@ -156,31 +156,17 @@ class PageController extends Controller
             $query->where('published', true)->orderBy('order_index');
         }]);
 
+        $allChildren = function ($query) use (&$allChildren) {
+            $query->orderBy('order_index')
+                ->with(['children' => $allChildren]);
+        };
+
         $navigation = $mod->pages()
             ->whereNull('parent_id')
-            ->with(['children' => function ($query) {
-                $query->orderBy('order_index');
-            }])
+            ->with(['children' => $allChildren])
             ->orderBy('order_index')
             ->get()
-            ->map(function ($navPage) {
-                return [
-                    'id' => $navPage->id,
-                    'title' => $navPage->title,
-                    'slug' => $navPage->slug,
-                    'kind' => $navPage->kind,
-                    'published' => $navPage->published,
-                    'children' => $navPage->children->map(function ($child) {
-                        return [
-                            'id' => $child->id,
-                            'title' => $child->title,
-                            'slug' => $child->slug,
-                            'kind' => $child->kind,
-                            'published' => $child->published,
-                        ];
-                    })->toArray(),
-                ];
-            });
+            ->map(fn (Page $navPage) => $this->serializeNavigationPage($navPage));
 
         $path = [];
         $current = $page;
@@ -568,6 +554,7 @@ class PageController extends Controller
             'title' => $page->title,
             'slug' => $page->slug,
             'kind' => $page->kind,
+            'published' => $page->published,
             'children' => $page->children
                 ->map(fn (Page $child) => $this->serializeNavigationPage($child))
                 ->values()
