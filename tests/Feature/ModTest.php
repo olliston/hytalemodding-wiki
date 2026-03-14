@@ -210,11 +210,34 @@ class ModTest extends TestCase
     public function test_guest_can_view_public_mod_page()
     {
         $owner = User::factory()->create();
-        $mod = Mod::factory()->public()->create(['owner_id' => $owner->id]);
+        $mod = Mod::factory()->public()->create([
+            'owner_id' => $owner->id,
+            'custom_css' => '.prose h1 { color: #8b5cf6; }',
+        ]);
 
         $response = $this->get("/mod/{$mod->slug}");
         $response->assertOk();
-        $response->assertInertia(fn ($page) => $page->component('Public/Mod'));
+        $response->assertInertia(fn (Assert $page) => $page
+            ->component('Public/Mod')
+            ->where('mod.custom_css', '.prose h1 { color: #8b5cf6; }')
+        );
+    }
+
+    public function test_public_mod_page_does_not_expose_unsafe_custom_css()
+    {
+        $owner = User::factory()->create();
+        $mod = Mod::factory()->public()->create([
+            'owner_id' => $owner->id,
+            'custom_css' => 'body { background-image: url(javascript:alert(1)); }',
+        ]);
+
+        $response = $this->get(route('public.mod', $mod));
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page) => $page
+            ->component('Public/Mod')
+            ->where('mod.custom_css', null)
+        );
     }
 
     public function test_public_mod_navigation_includes_nested_descendants()

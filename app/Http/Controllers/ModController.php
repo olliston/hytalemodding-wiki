@@ -615,6 +615,7 @@ class ModController extends Controller
             'description' => $mod->description,
             'icon_url' => $mod->icon_url,
             'visibility' => $mod->visibility,
+            'custom_css' => $mod->safe_custom_css,
             'custom_domain' => $mod->custom_domain,
             'owner' => $this->serializeOwner($mod->owner),
             'root_pages' => $rootPages
